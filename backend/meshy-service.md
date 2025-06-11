@@ -1,0 +1,3 @@
+# Meshy 서비스 연동
+
+`MeshyService.java`는 외부 Meshy API와 연동하여 이미지 생성이나 변환 등의 AI 서비스를 제공합니다...

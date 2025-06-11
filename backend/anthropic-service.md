@@ -1,0 +1,3 @@
+# Anthropic API 연동
+
+`AnthropicService.java`는 외부 Anthropic API (Claude 등)에 요청을 보내고 응답을 받아 처리합니다...

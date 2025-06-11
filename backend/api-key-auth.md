@@ -1,0 +1,3 @@
+# API Key 인증 필터
+
+`ApiKeyAuthFilter.java`는 서버에 들어오는 요청을 인터셉트하여 유효한 API 키가 있는지 확인합니다...
