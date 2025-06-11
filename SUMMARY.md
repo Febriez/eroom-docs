@@ -1,6 +1,6 @@
 # Table of contents
 
-* [🎮 프로젝트 개요](README.md)
+* [🎮 Eroom](README.md)
 
 ## 📋 1. 프로젝트 개요
 * [1.1 프로젝트 소개](project-overview/project-introduction.md)
