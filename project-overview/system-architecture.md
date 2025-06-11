@@ -2,10 +2,10 @@
 
 ## 🏗️ 시스템 개요
 
-<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; margin: 20px 0;">
-  <h3 style="margin: 0;">마이크로서비스 기반 AI 통합 아키텍처</h3>
-  <p style="margin: 10px 0 0 0;">비동기 처리와 AI 서비스를 결합한 확장 가능한 시스템 설계</p>
-</div>
+{% hint style="info" %}
+### **마이크로서비스 기반 AI 통합 아키텍처**
+비동기 처리와 AI 서비스를 결합한 확장 가능한 시스템 설계
+{% endhint %}
 
 ERoom 시스템은 **레이어드 아키텍처**와 **이벤트 기반 비동기 처리**를 결합하여 안정적이고 확장 가능한 서비스를 제공합니다.
 
@@ -78,14 +78,12 @@ graph TB
 
 ### 2️⃣ **API Gateway (게이트웨이 계층)**
 
-<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 10px 0;">🔐 보안과 라우팅</h4>
-  <ul style="margin: 0;">
-    <li><strong>Undertow Server</strong>: 고성능 NIO 기반 웹 서버</li>
-    <li><strong>API Key Filter</strong>: 모든 요청에 대한 인증 처리</li>
-    <li><strong>Request Routing</strong>: RESTful 엔드포인트 관리</li>
-  </ul>
-</div>
+{% hint style="success" %}
+#### 🔐 **보안과 라우팅**
+* **Undertow Server**: 고성능 NIO 기반 웹 서버
+* **API Key Filter**: 모든 요청에 대한 인증 처리
+* **Request Routing**: RESTful 엔드포인트 관리
+  {% endhint %}
 
 ### 3️⃣ **Business Logic Layer (비즈니스 로직 계층)**
 
@@ -106,24 +104,15 @@ graph LR
 
 ### 4️⃣ **AI Service Layer (AI 서비스 계층)**
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0;">
-  <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
-    <h4 style="margin: 0 0 10px 0;">🤖 Anthropic Service</h4>
-    <ul style="margin: 0;">
-      <li>시나리오 생성 (1-3분)</li>
-      <li>스크립트 생성 (30초)</li>
-      <li>Claude Sonnet 4 모델 사용</li>
-    </ul>
-  </div>
-  <div style="background: #f3e5f5; padding: 20px; border-radius: 10px;">
-    <h4 style="margin: 0 0 10px 0;">🎨 Meshy Service</h4>
-    <ul style="margin: 0;">
-      <li>3D 모델 프리뷰 (1-3분)</li>
-      <li>모델 정제 (3-5분)</li>
-      <li>FBX 포맷 출력</li>
-    </ul>
-  </div>
-</div>
+#### 🤖 **Anthropic Service**
+> * 시나리오 생성 (1-3분)
+> * 스크립트 생성 (30초)
+> * Claude Sonnet 4 모델 사용
+
+#### 🎨 **Meshy Service**
+> * 3D 모델 프리뷰 (1-3분)
+> * 모델 정제 (3-5분)
+> * FBX 포맷 출력
 
 ### 5️⃣ **Data Layer (데이터 계층)**
 
@@ -162,27 +151,16 @@ GET /room/result?ruid=room_12345 → { "status": "COMPLETED", ... }
 
 ## 🚀 성능 최적화 전략
 
-<div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 10px 0;">⚡ 최적화 포인트</h4>
-  <table style="width: 100%; margin-top: 10px;">
-    <tr>
-      <td><strong>병렬 처리</strong></td>
-      <td>AI 서비스 호출 병렬화로 전체 처리 시간 단축</td>
-    </tr>
-    <tr>
-      <td><strong>캐싱 전략</strong></td>
-      <td>자주 사용되는 프롬프트와 설정 메모리 캐싱</td>
-    </tr>
-    <tr>
-      <td><strong>연결 풀링</strong></td>
-      <td>HTTP 클라이언트 연결 재사용으로 오버헤드 감소</td>
-    </tr>
-    <tr>
-      <td><strong>비동기 I/O</strong></td>
-      <td>Undertow의 NIO 활용으로 동시 연결 처리 향상</td>
-    </tr>
-  </table>
-</div>
+{% hint style="warning" %}
+#### ⚡ **최적화 포인트**
+
+| 최적화 기법 | 설명 |
+|------------|------|
+| **병렬 처리** | AI 서비스 호출 병렬화로 전체 처리 시간 단축 |
+| **캐싱 전략** | 자주 사용되는 프롬프트와 설정 메모리 캐싱 |
+| **연결 풀링** | HTTP 클라이언트 연결 재사용으로 오버헤드 감소 |
+| **비동기 I/O** | Undertow의 NIO 활용으로 동시 연결 처리 향상 |
+{% endhint %}
 
 ---
 
@@ -212,20 +190,14 @@ graph LR
 
 ## 📊 시스템 모니터링
 
-<div style="background: #f0f0f0; padding: 20px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 10px 0;">📈 모니터링 지표</h4>
-  <ul style="margin: 0;">
-    <li><strong>큐 상태</strong>: 대기/처리중/완료 작업 수</li>
-    <li><strong>응답 시간</strong>: API별 평균 응답 시간</li>
-    <li><strong>에러율</strong>: AI 서비스별 실패율</li>
-    <li><strong>리소스 사용량</strong>: CPU, 메모리, 네트워크</li>
-  </ul>
-</div>
+{% hint style="info" %}
+#### 📈 **모니터링 지표**
+* **큐 상태**: 대기/처리중/완료 작업 수
+* **응답 시간**: API별 평균 응답 시간
+* **에러율**: AI 서비스별 실패율
+* **리소스 사용량**: CPU, 메모리, 네트워크
+  {% endhint %}
 
 ---
 
-<div style="text-align: center; margin-top: 30px;">
-  <p style="color: #666;">
-    이 아키텍처는 <strong>안정성</strong>, <strong>확장성</strong>, <strong>성능</strong>을 모두 고려한 설계입니다.
-  </p>
-</div>
+> 💡 이 아키텍처는 **안정성**, **확장성**, **성능**을 모두 고려한 설계입니다.

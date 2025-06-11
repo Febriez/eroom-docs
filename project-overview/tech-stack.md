@@ -2,10 +2,10 @@
 
 ## 🛠️ 기술 스택 개요
 
-<div style="background: linear-gradient(to right, #11998e, #38ef7d); padding: 30px; border-radius: 15px; color: white; margin: 20px 0;">
-  <h3 style="margin: 0;">최신 기술의 완벽한 조합</h3>
-  <p style="margin: 10px 0 0 0;">성능, 안정성, 확장성을 모두 고려한 기술 선택</p>
-</div>
+{% hint style="info" %}
+### **최신 기술의 완벽한 조합**
+성능, 안정성, 확장성을 모두 고려한 기술 선택
+{% endhint %}
 
 ---
 
@@ -55,15 +55,13 @@ graph TB
 
 ### ☕ **Java 17 LTS**
 
-<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 10px 0;">선택 이유</h4>
-  <ul style="margin: 0;">
-    <li><strong>장기 지원(LTS)</strong>: 2029년까지 보안 업데이트 보장</li>
-    <li><strong>최신 기능</strong>: Records, Pattern Matching, Text Blocks</li>
-    <li><strong>성능 향상</strong>: G1GC 개선, JIT 컴파일러 최적화</li>
-    <li><strong>생태계</strong>: 풍부한 라이브러리와 도구</li>
-  </ul>
-</div>
+{% hint style="success" %}
+#### **선택 이유**
+* **장기 지원(LTS)**: 2029년까지 보안 업데이트 보장
+* **최신 기능**: Records, Pattern Matching, Text Blocks
+* **성능 향상**: G1GC 개선, JIT 컴파일러 최적화
+* **생태계**: 풍부한 라이브러리와 도구
+  {% endhint %}
 
 ### 🚀 **Undertow**
 
@@ -76,24 +74,15 @@ graph TB
 
 ### 📦 **주요 라이브러리**
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0;">
-  <div style="background: #f3e5f5; padding: 20px; border-radius: 10px;">
-    <h4 style="margin: 0 0 10px 0;">Gson</h4>
-    <ul style="margin: 0;">
-      <li>Google의 JSON 처리 라이브러리</li>
-      <li>간단한 API와 높은 성능</li>
-      <li>커스텀 직렬화 지원</li>
-    </ul>
-  </div>
-  <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
-    <h4 style="margin: 0 0 10px 0;">OkHttp</h4>
-    <ul style="margin: 0;">
-      <li>Square의 HTTP 클라이언트</li>
-      <li>연결 풀링과 캐싱</li>
-      <li>자동 재시도 메커니즘</li>
-    </ul>
-  </div>
-</div>
+#### **Gson**
+> * Google의 JSON 처리 라이브러리
+> * 간단한 API와 높은 성능
+> * 커스텀 직렬화 지원
+
+#### **OkHttp**
+> * Square의 HTTP 클라이언트
+> * 연결 풀링과 캐싱
+> * 자동 재시도 메커니즘
 
 ---
 
@@ -101,18 +90,12 @@ graph TB
 
 ### **Anthropic Claude AI**
 
-<div style="background: #e1f5fe; padding: 25px; border-radius: 10px; margin: 20px 0;">
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-      <h4 style="margin: 0 0 10px 0;">Claude Sonnet 4 (claude-sonnet-4-20250514)</h4>
-      <p style="margin: 0;">최신 대형 언어 모델로 창의적이고 정확한 콘텐츠 생성</p>
-    </div>
-    <div style="text-align: right;">
-      <div style="font-size: 2em; font-weight: bold; color: #0277bd;">16K</div>
-      <div style="color: #666;">Max Tokens</div>
-    </div>
-  </div>
-</div>
+{% hint style="info" %}
+#### **Claude Sonnet 4** (claude-sonnet-4-20250514)
+최신 대형 언어 모델로 창의적이고 정확한 콘텐츠 생성
+
+**최대 토큰 수: 16K**
+{% endhint %}
 
 **활용 분야:**
 - 🎭 **시나리오 생성**: 창의적인 방탈출 스토리와 퍼즐 설계
@@ -121,23 +104,15 @@ graph TB
 
 ### **Meshy AI**
 
-<div style="background: #fce4ec; padding: 25px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 10px 0;">Text-to-3D Generation API</h4>
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-    <div style="text-align: center;">
-      <div style="font-size: 1.5em; font-weight: bold; color: #c2185b;">Preview</div>
-      <div style="color: #666;">1-3분</div>
-    </div>
-    <div style="text-align: center;">
-      <div style="font-size: 1.5em; font-weight: bold; color: #c2185b;">Refine</div>
-      <div style="color: #666;">3-5분</div>
-    </div>
-    <div style="text-align: center;">
-      <div style="font-size: 1.5em; font-weight: bold; color: #c2185b;">FBX</div>
-      <div style="color: #666;">출력 포맷</div>
-    </div>
-  </div>
-</div>
+{% hint style="warning" %}
+#### **Text-to-3D Generation API**
+
+| 단계 | 소요 시간 | 설명 |
+|------|-----------|------|
+| **Preview** | 1-3분 | 빠른 프리뷰 생성 |
+| **Refine** | 3-5분 | 고품질 정제 |
+| **Export** | FBX | Unity 호환 포맷 |
+{% endhint %}
 
 ---
 
@@ -158,27 +133,16 @@ graph TB
 
 ### **Firebase Firestore**
 
-<div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 10px 0;">선택 이유</h4>
-  <table style="width: 100%; margin-top: 10px;">
-    <tr>
-      <td><strong>실시간 동기화</strong></td>
-      <td>클라이언트 간 즉각적인 데이터 동기화</td>
-    </tr>
-    <tr>
-      <td><strong>오프라인 지원</strong></td>
-      <td>네트워크 없이도 작동, 재연결 시 자동 동기화</td>
-    </tr>
-    <tr>
-      <td><strong>확장성</strong></td>
-      <td>자동 샤딩으로 무제한 확장 가능</td>
-    </tr>
-    <tr>
-      <td><strong>보안 규칙</strong></td>
-      <td>세밀한 접근 권한 제어</td>
-    </tr>
-  </table>
-</div>
+{% hint style="warning" %}
+#### **선택 이유**
+
+| 특징 | 설명 |
+|------|------|
+| **실시간 동기화** | 클라이언트 간 즉각적인 데이터 동기화 |
+| **오프라인 지원** | 네트워크 없이도 작동, 재연결 시 자동 동기화 |
+| **확장성** | 자동 샤딩으로 무제한 확장 가능 |
+| **보안 규칙** | 세밀한 접근 권한 제어 |
+{% endhint %}
 
 ---
 
@@ -195,26 +159,17 @@ graph TB
 
 ### **AI 서비스 선택 근거**
 
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0;">
-  <div style="background: #e8f5e9; padding: 20px; border-radius: 10px;">
-    <h4 style="margin: 0 0 10px 0;">✅ Claude vs GPT-4</h4>
-    <ul style="margin: 0;">
-      <li>더 나은 코드 생성 능력</li>
-      <li>한국어 이해도 우수</li>
-      <li>일관된 출력 형식</li>
-      <li>비용 효율적</li>
-    </ul>
-  </div>
-  <div style="background: #e3f2fd; padding: 20px; border-radius: 10px;">
-    <h4 style="margin: 0 0 10px 0;">✅ Meshy vs 기타 3D AI</h4>
-    <ul style="margin: 0;">
-      <li>빠른 생성 속도</li>
-      <li>높은 품질의 모델</li>
-      <li>Unity 호환 포맷</li>
-      <li>합리적인 가격</li>
-    </ul>
-  </div>
-</div>
+#### ✅ **Claude vs GPT-4**
+> * 더 나은 코드 생성 능력
+> * 한국어 이해도 우수
+> * 일관된 출력 형식
+> * 비용 효율적
+
+#### ✅ **Meshy vs 기타 3D AI**
+> * 빠른 생성 속도
+> * 높은 품질의 모델
+> * Unity 호환 포맷
+> * 합리적인 가격
 
 ---
 
@@ -249,8 +204,4 @@ sequenceDiagram
 
 ---
 
-<div style="background: #f0f0f0; padding: 20px; border-radius: 10px; margin-top: 30px; text-align: center;">
-  <p style="margin: 0;">
-    각 기술은 <strong>최고의 성능</strong>과 <strong>개발 효율성</strong>을 위해 신중히 선택되었습니다.
-  </p>
-</div>
+> 💡 각 기술은 **최고의 성능**과 **개발 효율성**을 위해 신중히 선택되었습니다.
