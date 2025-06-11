@@ -1,6 +1,8 @@
-# Summary
+# Table of contents
 
-## 🌟 1. 프로젝트 개요
+* [🎮 프로젝트 개요](README.md)
+
+## 📋 1. 프로젝트 개요
 * [1.1 프로젝트 소개](project-overview/project-introduction.md)
 * [1.2 전체 시스템 아키텍처](project-overview/system-architecture.md)
 * [1.3 기술 스택 요약](project-overview/tech-stack.md)
@@ -19,19 +21,19 @@
 * [3.3 API 설계 명세](architecture/api-design.md)
 * [3.4 데이터 모델링](architecture/data-modeling.md)
 
-## 🖥️ 4. 서버 개발 (Backend)
+## 🖥️ 4. 서버 개발
 * [4.1 서버 개발 개요](backend/overview.md)
 * [4.2 Java + Undertow 서버 구현](backend/java-undertow-implementation.md)
 * [4.3 AI 프롬프트 엔지니어링](backend/ai-prompt-engineering.md)
 * [4.4 외부 API 연동](backend/external-api-integration.md)
 * [4.5 성능 최적화 & 테스트](backend/performance-optimization.md)
 
-## 🎮 5. Unity 클라이언트 개발
+## 🎮 5. Unity 클라이언트
 * [5.1 Unity6 3D 게임 구현](unity/game-implementation.md)
 * [5.2 UI/UX 설계](unity/ui-ux-design.md)
 * [5.3 게임 로직 구현](unity/game-logic.md)
 
-## 🎨 6. 3D 모델링 & 에셋
+## 🎨 6. 3D 모델링
 * [6.1 3D 모델 파이프라인](3d-modeling/model-pipeline.md)
 * [6.2 텍스처 & 머티리얼](3d-modeling/texture-material.md)
 * [6.3 애니메이션 시스템](3d-modeling/animation-system.md)
