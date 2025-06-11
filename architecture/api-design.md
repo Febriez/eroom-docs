@@ -1,335 +1,251 @@
-# E-room API Documentation
+# 2.2 API 설계 명세
 
-{% hint style="info" %}
-**Version 2.1** - ruid 기반 시스템
-{% endhint %}
+## 🌐 API 설계 개요
 
-## 개요
+<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px; color: white; margin: 20px 0;">
+  <h3 style="margin: 0;">RESTful API 설계</h3>
+  <p style="margin: 10px 0 0 0;">비동기 처리와 상태 기반 폴링을 활용한 효율적인 API 구조</p>
+</div>
 
-E-room 서버는 RESTful API를 통해 VR 방탈출 게임의 방 생성, 상태 조회, 건강성 확인 기능을 제공합니다. 모든 API는 JSON 형식으로 통신하며, 특히 방 생성 기능은 **비동기 큐 시스템**을
-통해 처리되어 클라이언트가 긴 시간 동안 응답을 기다릴 필요 없이 안정적으로 요청을 처리할 수 있습니다.
+---
 
-## 기본 정보
+## 📋 API 엔드포인트 요약
 
-### Base URL
+| 메서드 | 경로 | 목적 | 응답 시간 |
+|--------|------|------|-----------|
+| `GET` | `/` | 서버 상태 확인 | < 10ms |
+| `GET` | `/health` | 상세 헬스체크 | < 20ms |
+| `POST` | `/room/create` | 룸 생성 요청 | < 100ms |
+| `GET` | `/room/result?ruid={id}` | 결과 조회 | < 50ms |
+| `GET` | `/queue/status` | 큐 상태 확인 | < 20ms |
 
-```
-http://192.168.0.248:8080
-```
+---
 
-### Content-Type
+## 🔑 인증 방식
 
-```
-application/json
+<div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <h4 style="margin: 0 0 10px 0;">API Key 인증</h4>
+  <p>모든 API 요청에는 <code>Authorization</code> 헤더가 필요합니다.</p>
+  
+  ```http
+  Authorization: your-api-key-here
+  Content-Type: application/json; charset=utf-8
+  ```
+</div>
+
+---
+
+## 🚀 핵심 API 플로우
+
+### 룸 생성 요청 → 결과 조회 플로우
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant Queue
+    participant AI Services
+    
+    Client->>Server: POST /room/create
+    Server->>Queue: Add to queue
+    Server-->>Client: { "ruid": "room_12345" }
+    
+    Note over Client: 폴링 시작
+    
+    Client->>Server: GET /room/result?ruid=room_12345
+    Server-->>Client: { "status": "QUEUED" }
+    
+    Queue->>AI Services: Process request
+    
+    Client->>Server: GET /room/result?ruid=room_12345
+    Server-->>Client: { "status": "PROCESSING" }
+    
+    AI Services-->>Queue: Complete
+    
+    Client->>Server: GET /room/result?ruid=room_12345
+    Server-->>Client: { "status": "COMPLETED", data... }
 ```
 
 ---
 
-## API 엔드포인트
+## 📝 요청/응답 포맷
 
-### 1. 서버 상태 확인 (Root)
+### 최초 룸 생성 요청
 
-{% swagger method="get" path="/" baseUrl="http://192.168.0.248:8080" summary="서버 기본 상태 확인" %}
-{% swagger-description %}
-서버의 기본 상태를 확인하는 엔드포인트입니다. 서버가 정상적으로 작동 중인지 빠르게 확인할 수 있습니다.
-{% endswagger-description %}
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+  <div>
+    <h4>요청 (Request)</h4>
+    
+```json
+POST /room/create
 
-{% swagger-response status="200: OK" description="서버 정상 작동" %}
-
-```javascript
-// 서버 상태 응답
+{
+  "uuid": "user_12345",
+  "theme": "우주정거장",
+  "keywords": ["미래", "과학"],
+  "difficulty": "normal",
+  "room_prefab": "https://example.com/prefab.fbx"
+}
 ```
+  </div>
+  <div>
+    <h4>응답 (Response)</h4>
+    
+```json
+HTTP/1.1 202 Accepted
 
-{% endswagger-response %}
-{% endswagger %}
-
-**예시:**
-
-```bash
-curl -X GET http://192.168.0.248:8080/
+{
+  "ruid": "room_a1b2c3d4e5f6",
+  "status": "Queued",
+  "message": "Poll /room/result?ruid=..."
+}
 ```
+  </div>
+</div>
 
-### 2. 건강성 및 큐 상태 조회 (Health Check)
-
-{% swagger method="get" path="/health" baseUrl="http://192.168.0.248:8080" summary="서버 건강성 및 큐 상태 조회" %}
-{% swagger-description %}
-서버의 상세한 건강성 상태와 큐 시스템의 현재 상태를 함께 확인할 수 있는 엔드포인트입니다.
-{% endswagger-description %}
-
-{% swagger-response status="200: OK" description="건강성 상태 정보" %}
+### 최종 완료 응답
 
 ```json
+GET /room/result?ruid=room_a1b2c3d4e5f6
+
 {
-  "status": "healthy",
-  "queue": {
-    "queued": 2,
-    "active": 1,
-    "completed": 21,
-    "maxConcurrent": 1
+  "uuid": "user_12345",
+  "ruid": "room_a1b2c3d4e5f6",
+  "theme": "우주정거장",
+  "difficulty": "normal",
+  "keywords": ["미래", "과학"],
+  "room_prefab": "https://example.com/prefab.fbx",
+  "scenario": {
+    "scenario_data": { ... },
+    "object_instructions": [ ... ]
+  },
+  "scripts": {
+    "GameManager.cs": "base64_encoded_content",
+    "DoorLock.cs": "base64_encoded_content"
+  },
+  "model_tracking": {
+    "SpaceHelmet": "mesh_tracking_id_1",
+    "ControlPanel": "mesh_tracking_id_2"
+  },
+  "success": true,
+  "timestamp": "1234567890"
+}
+```
+
+---
+
+## 🔄 상태 코드 설계
+
+<div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <h4 style="margin: 0 0 10px 0;">처리 상태</h4>
+  <table style="width: 100%; margin-top: 10px;">
+    <tr>
+      <th>상태</th>
+      <th>의미</th>
+      <th>다음 액션</th>
+    </tr>
+    <tr>
+      <td><code>QUEUED</code></td>
+      <td>큐에 대기 중</td>
+      <td>계속 폴링</td>
+    </tr>
+    <tr>
+      <td><code>PROCESSING</code></td>
+      <td>AI 처리 중</td>
+      <td>계속 폴링</td>
+    </tr>
+    <tr>
+      <td><code>COMPLETED</code></td>
+      <td>성공적으로 완료</td>
+      <td>결과 사용</td>
+    </tr>
+    <tr>
+      <td><code>FAILED</code></td>
+      <td>처리 실패</td>
+      <td>에러 처리</td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 📊 HTTP 상태 코드 활용
+
+| HTTP 코드 | 의미 | 사용 시나리오 |
+|-----------|------|---------------|
+| `200 OK` | 성공 | GET 요청 성공 |
+| `202 Accepted` | 수락됨 | 비동기 작업 시작 |
+| `400 Bad Request` | 잘못된 요청 | 필수 파라미터 누락 |
+| `401 Unauthorized` | 인증 실패 | API 키 누락/오류 |
+| `404 Not Found` | 없음 | ruid가 존재하지 않음 |
+| `500 Internal Server Error` | 서버 오류 | 예상치 못한 오류 |
+
+---
+
+## 🎯 API 설계 원칙
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+  <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; text-align: center;">
+    <h4>🔄 비동기 우선</h4>
+    <p>긴 작업은 비동기로 처리하고 즉시 응답</p>
+  </div>
+  <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; text-align: center;">
+    <h4>📊 상태 기반</h4>
+    <p>명확한 상태 전이와 폴링 메커니즘</p>
+  </div>
+  <div style="background: #fff3cd; padding: 20px; border-radius: 10px; text-align: center;">
+    <h4>🛡️ 안전성</h4>
+    <p>모든 입력 검증과 에러 처리</p>
+  </div>
+</div>
+
+---
+
+## 📈 성능 고려사항
+
+### 폴링 권장 주기
+
+```javascript
+// 클라이언트 폴링 예제
+const pollInterval = {
+  initial: 2000,    // 2초
+  max: 10000,       // 10초
+  multiplier: 1.5   // 점진적 증가
+};
+
+async function pollResult(ruid) {
+  let interval = pollInterval.initial;
+  
+  while (true) {
+    const result = await fetch(`/room/result?ruid=${ruid}`);
+    const data = await result.json();
+    
+    if (data.status === 'COMPLETED' || data.status === 'FAILED') {
+      return data;
+    }
+    
+    await sleep(interval);
+    interval = Math.min(interval * pollInterval.multiplier, pollInterval.max);
   }
 }
 ```
 
-{% endswagger-response %}
-{% endswagger %}
+---
 
-**예시:**
+## 🔗 상세 API 문서
 
-```bash
-curl -X GET http://192.168.0.248:8080/health
-```
+각 엔드포인트의 상세한 사용법은 아래 링크에서 확인하세요:
 
-### 3. 방 생성 요청 (비동기)
-
-{% swagger method="post" path="/room/create" baseUrl="http://192.168.0.248:8080" summary="방 생성 요청" %}
-{% swagger-description %}
-방 생성을 요청하는 핵심 엔드포인트입니다. 요청은 즉시 처리 큐에 등록되며, 서버는 고유한 ruid(Room Unique ID)를 생성하여 즉시 반환합니다. 실제 생성 작업은 백그라운드에서 비동기적으로 수행됩니다.
-{% endswagger-description %}
-
-{% swagger-parameter in="body" name="uuid" type="string" required="true" %}
-사용자 계정 ID. 방을 생성하는 유저를 식별하기 위한 값
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="theme" type="string" required="true" %}
-방탈출 게임의 주제/테마
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="keywords" type="string[]" required="true" %}
-게임에 포함될 오브젝트 키워드 배열
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="difficulty" type="string" required="false" %}
-게임 난이도 ("easy", "normal", "hard")
-{% endswagger-parameter %}
-
-{% swagger-parameter in="body" name="room_prefab" type="string" required="true" %}
-Unity 방 프리팹의 HTTPS URL
-{% endswagger-parameter %}
-
-{% swagger-response status="202: Accepted" description="작업이 성공적으로 큐에 등록됨" %}
-
-```json
-{
-  "ruid": "room_a1b2c3d4e5f6a7b8",
-  "status": "Queued",
-  "message": "Room creation request has been accepted. Poll /room/result?ruid=room_a1b2c3d4e5f6a7b8 for status."
-}
-```
-
-{% endswagger-response %}
-
-{% swagger-response status="400: Bad Request" description="잘못된 요청" %}
-
-```json
-{
-  "success": false,
-  "error": "Invalid request body or missing 'uuid' (userId)."
-}
-```
-
-{% endswagger-response %}
-{% endswagger %}
-
-{% hint style="warning" %}
-**비동기 처리:** 클라이언트는 반환된 ruid를 사용하여 `/room/result` 엔드포인트에서 작업 결과를 조회해야 합니다.
-{% endhint %}
-
-#### 요청 예시
-
-```bash
-curl -X POST http://192.168.0.248:8080/room/create \
-  -H "Content-Type: application/json" \
-  -d '{
-    "uuid": "user-account-id-007",
-    "theme": "Ancient Tomb Exploration",
-    "keywords": ["sarcophagus", "torch", "hieroglyphs"],
-    "room_prefab": "https://cdn.example.com/ancient-tomb.fbx"
-  }'
-```
-
-#### 응답 필드 설명
-
-| 필드        | 타입     | 설명                     |
-|-----------|--------|------------------------|
-| `ruid`    | String | 서버가 생성한 고유한 방 작업 식별자   |
-| `status`  | String | 현재 작업 상태 ("Queued" 고정) |
-| `message` | String | 다음 행동에 대한 안내 메시지       |
-
-### 4. 생성 결과 조회 (폴링)
-
-{% swagger method="get" path="/room/result" baseUrl="http://192.168.0.248:8080" summary="방 생성 결과 조회" %}
-{% swagger-description %}
-POST /room/create 요청 시 반환된 ruid를 사용하여 방 생성 작업의 현재 상태를 조회하거나 최종 결과를 가져옵니다. 클라이언트는 이 엔드포인트를 주기적으로(예: 5초마다) 호출하여 상태를 확인할 수
-있습니다.
-{% endswagger-description %}
-
-{% swagger-parameter in="query" name="ruid" type="string" required="true" %}
-조회할 작업의 ID
-{% endswagger-parameter %}
-
-{% swagger-response status="200: OK" description="처리 중일 때" %}
-
-```json
-{
-  "ruid": "room_1f9e8a7b6c5d4e3f",
-  "status": "PROCESSING"
-}
-```
-
-{% endswagger-response %}
-
-{% swagger-response status="200: OK" description="성공적으로 완료되었을 때" %}
-
-```json
-{
-  "uuid": "user-account-id-007",
-  "ruid": "room_1f9e8a7b6c5d4e3f",
-  "theme": "Ancient Tomb Exploration",
-  "success": true,
-  "scenario": {},
-  "scripts": {},
-  "model_tracking": {},
-  "timestamp": "1703123456789"
-}
-```
-
-{% endswagger-response %}
-
-{% swagger-response status="200: OK" description="작업이 실패했을 때" %}
-
-```json
-{
-  "uuid": "user-account-id-007",
-  "ruid": "room_1f9e8a7b6c5d4e3f",
-  "success": false,
-  "error": "통합 시나리오 생성 실패: LLM 응답이 null입니다.",
-  "timestamp": "1703123456789"
-}
-```
-
-{% endswagger-response %}
-
-{% swagger-response status="404: Not Found" description="ID를 찾을 수 없을 때" %}
-
-```json
-{
-  "success": false,
-  "error": "Job with ruid 'room_1f9e8a7b6c5d4e3f' not found. It may have been already claimed or never existed."
-}
-```
-
-{% endswagger-response %}
-{% endswagger %}
-
-{% hint style="danger" %}
-**중요:** 결과(성공 또는 실패)를 한 번 반환한 후에는 서버에서 해당 데이터가 삭제됩니다.
-{% endhint %}
-
-**예시:**
-
-```bash
-curl -X GET "http://192.168.0.248:8080/room/result?ruid=room_1f9e8a7b6c5d4e3f"
-```
+<div style="background: #f0f0f0; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <p style="margin: 0; text-align: center; font-size: 1.1em;">
+    <a href="../api-reference/rest-api-spec.md" style="color: #667eea; text-decoration: none; font-weight: bold;">
+      📖 전체 API 레퍼런스 보기 →
+    </a>
+  </p>
+</div>
 
 ---
 
-## 데이터 명세
-
-### 최종 성공 결과 응답
-
-| 필드               | 타입       | 설명                          |
-|------------------|----------|-----------------------------|
-| `uuid`           | String   | 요청시 제공된 사용자 계정 ID           |
-| `ruid`           | String   | 시스템에서 생성한 고유한 방 작업 식별자      |
-| `theme`          | String   | 생성된 방의 테마                   |
-| `keywords`       | String[] | 사용된 키워드 배열                  |
-| `difficulty`     | String   | 적용된 난이도                     |
-| `room_prefab`    | String   | 방 프리팹 URL                   |
-| `scenario`       | Object   | AI가 생성한 시나리오 데이터            |
-| `scripts`        | Object   | Base64로 인코딩된 Unity C# 스크립트들 |
-| `model_tracking` | Object   | 3D 모델 생성 상태 추적 ID들          |
-| `success`        | Boolean  | 요청 성공 여부 (true)             |
-| `timestamp`      | String   | 응답 생성 시간 (Unix timestamp)   |
-
----
-
-## 사용 예시 시나리오
-
-### Step 1: 사용자 ID 준비
-
-클라이언트는 사용자 ID uuid를 준비합니다.
-
-```javascript
-const userId = "my-user-id";
-```
-
-### Step 2: 방 생성 요청
-
-방 생성을 요청하고 응답으로 오는 ruid를 저장합니다.
-
-```bash
-curl -X POST http://192.168.0.248:8080/room/create \
-  -H "Content-Type: application/json" \
-  -d '{
-    "uuid": "my-user-id",
-    "theme": "Jungle Temple",
-    "keywords": ["vine", "statue", "gem"],
-    "room_prefab": "https://example.com/temple.fbx"
-  }'
-```
-
-**응답:**
-
-```json
-{
-  "ruid": "room_abcdef1234567890",
-  "status": "Queued",
-  "message": "Room creation request has been accepted. Poll /room/result?ruid=room_abcdef1234567890 for status."
-}
-```
-
-### Step 3: 결과 조회 (폴링)
-
-저장한 ruid로 결과를 주기적으로 폴링합니다.
-
-```bash
-# 처리 중일 때
-curl -X GET "http://192.168.0.248:8080/room/result?ruid=room_abcdef1234567890"
-# 응답: {"ruid":"room_abcdef1234567890","status":"PROCESSING"}
-
-# 작업 완료 후
-curl -X GET "http://192.168.0.248:8080/room/result?ruid=room_abcdef1234567890"
-# 응답: {"ruid": "room_abcdef1234567890", "success": true, ...}
-```
-
-### Step 4: 결과 확인 완료
-
-완료된 결과를 다시 조회하면 404 Not Found가 반환됩니다.
-
-```bash
-curl -X GET "http://192.168.0.248:8080/room/result?ruid=room_abcdef1234567890"
-# 응답: {"success":false,"error":"Job with ruid '...' not found..."}
-```
-
----
-
-## 성능 특성
-
-{% hint style="success" %}
-**⚡ 빠른 응답:** POST `/room/create`의 응답 시간은 100ms 미만으로 매우 빠르며, 전체 방 생성에 소요되는 시간(30초~10분)은 백그라운드에서 처리됩니다.
-{% endhint %}
-
-## 주요 특징
-
-- **비동기 큐 시스템:** 안정적인 방 생성 처리
-- **ruid 기반 추적:** 고유한 식별자로 작업 상태 관리
-- **폴링 방식:** 클라이언트가 편리하게 결과 조회
-- **일회성 결과:** 보안을 위한 결과 자동 삭제
-
-## 👥 **담당자**
-
-**작성자**: 옥병준  
-**최종 수정일**: 2025-06-11  
-**문서 버전**: v2.0
-
----
+<div style="text-align: center; margin-top: 30px; color: #666;">
+  <p>이 API는 <strong>단순함</strong>과 <strong>효율성</strong>을 목표로 설계되었습니다.</p>
+</div>
