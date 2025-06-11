@@ -229,12 +229,12 @@ private CompletableFuture<ModelGenerationResult> createModelTask(String prompt, 
   - 로그 파일 크기: 10시간 동안 약 850MB
 
 병목 구간 분석:
-  - AI 시나리오 생성: 18-28초 (35%)
-  - AI 스크립트 생성: 22-38초 (45%)
-  - 3D 모델 생성: 5-10분 (백그라운드)
-  - JSON 파싱/인코딩: 2-4초 (8%)
-  - 네트워크 I/O: 1-2초 (4%)
-  - 큐 처리 오버헤드: < 1초 (2%)
+  - AI 시나리오 생성: 30-80초 (26%)
+  - AI 스크립트 생성: 110-250초 ~~(51%)~~ *비동기 처리로 시행되기에 포함되지 않음*
+  - 3D 모델 생성: 2-6분 (74%)
+  - JSON 파싱/인코딩: 0.4초 (0.1%)
+  - 네트워크 I/O: < 1초 (0.2%)
+  - 큐 처리 오버헤드: < 1초 (0.2%)
 ```
 
 ### **실제 오류 케이스 분석**
@@ -245,7 +245,7 @@ private CompletableFuture<ModelGenerationResult> createModelTask(String prompt, 
    원인: "우주 정거장 + 마법사 + 중세 기사" 모순된 테마 조합
    에러: Claude 4 응답에서 JSON 구조 불일치
    큐 처리: 정상적으로 실패 응답 전달
-   해결: 프롬프트 개선 필요
+   해결: 프롬프트 개선
 
 2. MeshyAI 모델 생성 타임아웃 (1건):
    원인: "투명한 유리구슬 내부의 복잡한 기계장치" 복잡한 설명
@@ -260,6 +260,7 @@ private CompletableFuture<ModelGenerationResult> createModelTask(String prompt, 
    해결: 청크 단위 인코딩으로 해결
 
 개선된 에러 처리:
+  ✅ 프롬프트 개선 작업
   ✅ 즉시 실패 vs 재시도 구분
   ✅ 상세한 에러 로그 기록
   ✅ 클라이언트에 의미있는 에러 메시지
