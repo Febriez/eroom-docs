@@ -40,12 +40,15 @@ flowchart TB
 
 ```java
 public class RoomServiceImpl implements RoomService, AutoCloseable {
-    private static final int MODEL_TIMEOUT_MINUTES = 10;
+    private static final int MODEL_TIMEOUT_MINUTES = ${model.generation.timeout.minutes};
+    private static final int EXECUTOR_SHUTDOWN_TIMEOUT_SECONDS = ${executor.shutdown.timeout.seconds};
     
-    private final AnthropicService anthropicService;  // AI 시나리오/스크립트
-    private final MeshyService meshyService;          // 3D 모델 생성
-    private final ConfigUtil configUtil;              // 설정 관리
-    private final ExecutorService executorService;    // 병렬 처리
+    private final AiService aiService;           // AI 시나리오/스크립트
+    private final MeshService meshService;       // 3D 모델 생성
+    private final ConfigurationManager configManager;  // 설정 관리
+    private final ExecutorService executorService;     // 병렬 처리
+    private final RequestValidator requestValidator;   // 요청 검증
+    private final ScenarioValidator scenarioValidator; // 시나리오 검증
     
     public JsonObject createRoom(RoomCreationRequest request, String ruid) {
         // 전체 룸 생성 프로세스 조율
@@ -54,10 +57,11 @@ public class RoomServiceImpl implements RoomService, AutoCloseable {
 ```
 
 **특징:**
-- ✅ 병렬 처리로 시간 단축
-- ✅ 타임아웃 관리 (10분)
-- ✅ 리소스 자동 정리
+- ✅ 병렬 처리로 시간 단축 (${room.service.executor.threads}개 스레드)
+- ✅ 타임아웃 관리 (${model.generation.timeout.minutes}분)
+- ✅ 리소스 자동 정리 (AutoCloseable)
 - ✅ 에러 격리 및 복구
+- ✅ 검증기 분리로 책임 명확화
   {% endhint %}
 
 ---
@@ -67,23 +71,26 @@ public class RoomServiceImpl implements RoomService, AutoCloseable {
 ### 1️⃣ **요청 검증 (Request Validation)**
 
 {% hint style="success" %}
-#### ✅ **검증 규칙**
+#### ✅ **검증 규칙 (RoomRequestValidator)**
 
-| 필드 | 검증 내용 | 실패 시 동작 |
-|------|-----------|--------------|
-| `uuid` | 비어있지 않음, 공백 제거 | IllegalArgumentException |
-| `theme` | 비어있지 않음, 최대 100자 | IllegalArgumentException |
-| `keywords` | 최소 1개, 각각 유효 | IllegalArgumentException |
-| `difficulty` | easy/normal/hard | 기본값 "normal" |
-| `room_prefab` | https:// URL | IllegalArgumentException |
+| 필드 | 검증 내용 | 실패 시 동작 | 에러 메시지 |
+|------|-----------|--------------|------------|
+| `uuid` | 비어있지 않음, 공백 제거 | IllegalArgumentException | "UUID가 비어있습니다" |
+| `theme` | 비어있지 않음, 최대 100자 | IllegalArgumentException | "테마가 비어있습니다" |
+| `keywords` | 최소 1개, 각각 유효 | IllegalArgumentException | "키워드가 비어있습니다" / "빈 키워드가 포함되어 있습니다" |
+| `difficulty` | easy/normal/hard | 기본값 "normal" | "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요." |
+| `room_prefab` | https:// URL | IllegalArgumentException | "roomPrefab URL이 비어있습니다" / "유효하지 않은 roomPrefab URL 형식입니다" |
 
 ```java
-private void validateRequest(RoomCreationRequest request) {
-    // UUID 검증
-    // 테마 검증
-    // 키워드 배열 검증
-    // 난이도 검증 (옵션)
-    // URL 형식 검증
+public class RoomRequestValidator implements RequestValidator {
+    @Override
+    public void validate(RoomCreationRequest request) {
+        validateUuid(request);
+        validateTheme(request);
+        validateKeywords(request);
+        validateRoomPrefab(request);
+        validateDifficulty(request);
+    }
 }
 ```
 {% endhint %}
@@ -91,7 +98,19 @@ private void validateRequest(RoomCreationRequest request) {
 ### 2️⃣ **시나리오 생성 (Scenario Generation)**
 
 {% hint style="info" %}
-#### 🎭 **AI 시나리오 생성**
+#### 🎭 **AI 시나리오 생성 및 검증**
+
+**시나리오 검증 (DefaultScenarioValidator):**
+```java
+public class DefaultScenarioValidator implements ScenarioValidator {
+    @Override
+    public void validate(JsonObject scenario) {
+        validateStructure(scenario);      // scenario_data, object_instructions 필수
+        validateScenarioData(scenario);   // theme, description, escape_condition, puzzle_flow
+        validateObjectInstructions(scenario); // GameManager가 첫 번째 오브젝트인지 확인
+    }
+}
+```
 
 **입력 데이터:**
 ```json
@@ -105,39 +124,13 @@ private void validateRequest(RoomCreationRequest request) {
 }
 ```
 
-**출력 구조:**
-```json
-{
-  "scenario_data": {
-    "theme": "버려진 우주정거장",
-    "description": "상세 배경 스토리",
-    "escape_condition": "탈출 조건",
-    "puzzle_flow": "퍼즐 진행 흐름"
-  },
-  "object_instructions": [
-    {
-      "name": "GameManager",
-      "type": "game_manager",
-      "functional_description": "..."
-    },
-    {
-      "name": "OxygenTank",
-      "type": "interactive_object",
-      "visual_description": "3D 모델링용 설명",
-      "interaction_method": "left_click",
-      "puzzle_role": "퍼즐에서의 역할"
-    }
-  ]
-}
-```
-
-**처리 시간:** 1-2분
+**처리 시간:** ${scenario.generation.time.avg}
 {% endhint %}
 
 ### 3️⃣ **3D 모델 생성 (Model Generation)**
 
 {% hint style="warning" %}
-#### 🎨 **병렬 모델 생성**
+#### 🎨 **병렬 모델 생성 및 실패 추적**
 
 ```mermaid
 graph LR
@@ -153,14 +146,20 @@ graph LR
     D3 --> E
     
     E --> F[최대 10분 대기]
+    F --> G{결과 수집}
+    G -->|성공| H[tracking에 추가]
+    G -->|실패| I[failed_models에 추가]
 ```
 
-**프로세스:**
-1. GameManager는 3D 모델 불필요 (스킵)
-2. 각 오브젝트별 병렬 요청
-3. CompletableFuture로 비동기 처리
-4. 타임아웃 관리 (10분)
-5. **각 모델 2-5분 소요** (병렬 처리로 전체 시간은 가장 오래 걸리는 모델 기준)
+**실패 추적 메커니즘:**
+- `error-` 접두사: 생성 실패
+- `timeout-` 접두사: 타임아웃
+- `no-tracking-` 접두사: ID 없음
+
+**모델 건너뛰기 조건:**
+1. GameManager (type: "game_manager")
+2. 필수 필드 누락 (name, visual_description)
+3. 빈 이름 또는 설명
 
 **결과 추적:**
 ```json
@@ -168,7 +167,8 @@ graph LR
   "OxygenTank": "mesh_tracking_id_1",
   "ControlPanel": "mesh_tracking_id_2",
   "failed_models": {
-    "BrokenDoor": "timeout-preview-123"
+    "BrokenDoor": "timeout-preview-123",
+    "error_3": "collection_error-1234567890"
   }
 }
 ```
@@ -179,18 +179,26 @@ graph LR
 {% hint style="info" %}
 #### 💻 **Unity C# 스크립트 생성**
 
-**생성되는 스크립트:**
-- `GameManager.cs` - 전체 게임 상태 관리
-- 각 오브젝트별 상호작용 스크립트
-- Base64 인코딩으로 전송
+**통합 스크립트 요청:**
+```java
+private JsonObject buildScriptRequest(JsonObject scenario, String roomPrefabUrl) {
+    JsonObject scriptRequest = new JsonObject();
+    scriptRequest.add("scenario_data", scenario.getAsJsonObject("scenario_data"));
+    scriptRequest.add("object_instructions", scenario.getAsJsonArray("object_instructions"));
+    scriptRequest.addProperty("room_prefab_url", roomPrefabUrl);
+    return scriptRequest;
+}
+```
 
 **스크립트 특징:**
 - Unity6 최신 API 사용
 - InputSystem 통합
 - 에러 처리 포함
 - 한국어 디버그 메시지
+- Base64 인코딩으로 전송
+- Temperature: ${anthropic.script.temperature} (낮은 창의성, 높은 정확성)
 
-**처리 시간:** 2-4분
+**처리 시간:** ${script.generation.time.avg}
 {% endhint %}
 
 ---
@@ -200,18 +208,18 @@ graph LR
 ### 동시 실행 구조
 
 ```java
-// 시나리오 생성
-JsonObject scenario = createIntegratedScenario(request, ruid, config);
+// 시나리오 생성 (동기)
+JsonObject scenario = createIntegratedScenario(request, ruid);
 
-// 3D 모델 생성 시작 (비동기)
+// 3D 모델 생성 시작 (비동기) - 최대 ${room.service.executor.threads}개 동시
 List<CompletableFuture<ModelGenerationResult>> modelFutures = 
     startModelGeneration(scenario);
 
-// 스크립트 생성 (시나리오 기반)
+// 스크립트 생성 (시나리오 완료 후 시작)
 Map<String, String> allScripts = 
-    createUnifiedScripts(scenario, request.getRoomPrefab(), config);
+    createUnifiedScripts(scenario, request.getRoomPrefab());
 
-// 모델 생성 완료 대기
+// 모델 생성 완료 대기 (최대 ${model.generation.timeout.minutes}분)
 JsonObject modelTracking = waitForModels(modelFutures);
 ```
 
@@ -222,8 +230,8 @@ JsonObject modelTracking = waitForModels(modelFutures);
 
 | 방식 | 시나리오 | 스크립트 | 3D 모델 | 총 시간 |
 |------|----------|-----------|---------|---------|
-| **순차 처리** | 1-2분 | 2-4분 | 5개×3분=15분 | 18-21분 |
-| **병렬 처리** | 1-2분 | 2-4분 (동시) | 2-5분 (동시) | **5-7분** |
+| **순차 처리** | ${scenario.generation.time.avg} | ${script.generation.time.avg} | 5개×3분=15분 | 18-21분 |
+| **병렬 처리** | ${scenario.generation.time.avg} | ${script.generation.time.avg} (동시) | ${model.refine.time.min}-${model.refine.time.max} (동시) | **${total.process.time.avg}** |
 
 **60-70% 시간 단축 효과**
 {% endhint %}
@@ -239,27 +247,36 @@ JsonObject modelTracking = waitForModels(modelFutures);
 
 ```java
 try {
-    // 메인 로직
+    requestValidator.validate(request);
 } catch (IllegalArgumentException e) {
     // 검증 실패 - 사용자 오류
     return createErrorResponse(request, ruid, e.getMessage());
+}
+
+try {
+    // 메인 로직
 } catch (RuntimeException e) {
     // 비즈니스 로직 오류
-    log.error("비즈니스 오류", e);
+    log.error("통합 방 생성 중 비즈니스 오류 발생: ruid={}", ruid, e);
     return createErrorResponse(request, ruid, e.getMessage());
 } catch (Exception e) {
     // 시스템 오류
-    log.error("시스템 오류", e);
+    log.error("통합 방 생성 중 시스템 오류 발생: ruid={}", ruid, e);
     return createErrorResponse(request, ruid, "시스템 오류가 발생했습니다");
 }
 ```
 
-**특징:**
-- 에러 타입별 구분 처리
-- 사용자 친화적 메시지
-- 상세 로깅
-- 다른 요청에 영향 없음
-  {% endhint %}
+**에러 응답 형식:**
+```json
+{
+  "uuid": "user_12345",
+  "ruid": "room_12345",
+  "success": false,
+  "error": "구체적인 에러 메시지",
+  "timestamp": "1234567890"
+}
+```
+{% endhint %}
 
 ---
 
@@ -272,20 +289,21 @@ public class RoomServiceImpl implements AutoCloseable {
     private final ExecutorService executorService;
     
     public RoomServiceImpl(...) {
-        // 10개 스레드 풀
-        this.executorService = Executors.newFixedThreadPool(10);
+        // ${room.service.executor.threads}개 스레드 풀
+        this.executorService = Executors.newFixedThreadPool(${room.service.executor.threads});
     }
     
     @Override
     public void close() {
-        // 정상 종료 시도
+        log.info("RoomService 종료 시작");
         executorService.shutdown();
         
-        // 60초 대기
-        if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-            // 강제 종료
+        // ${executor.shutdown.timeout.seconds}초 대기
+        if (!executorService.awaitTermination(${executor.shutdown.timeout.seconds}, TimeUnit.SECONDS)) {
+            log.warn("ExecutorService가 정상적으로 종료되지 않아 강제 종료합니다");
             executorService.shutdownNow();
         }
+        log.info("RoomService 종료 완료");
     }
 }
 ```
@@ -294,11 +312,11 @@ public class RoomServiceImpl implements AutoCloseable {
 
 | 단계 | 예상 메모리 | 지속 시간 |
 |------|-------------|-----------|
-| 요청 수신 | ~1KB | 순간 |
-| 시나리오 생성 | ~50KB | 1-2분 |
-| 스크립트 생성 | ~100KB | 2-4분 |
-| 3D 모델 추적 | ~10KB | 2-5분 |
-| 최종 응답 | ~200KB | 전송까지 |
+| 요청 수신 | ${request.data.avg.size} | 순간 |
+| 시나리오 생성 | ${scenario.data.avg.size} | ${scenario.generation.time.avg} |
+| 스크립트 생성 | ~100KB | ${script.generation.time.avg} |
+| 3D 모델 추적 | ${model.metadata.avg.size} | ${model.refine.time.avg} |
+| 최종 응답 | ${response.data.avg.size} | 전송까지 |
 
 ---
 
@@ -311,14 +329,24 @@ public class RoomServiceImpl implements AutoCloseable {
 
 ```java
 // INFO: 주요 단계 시작/완료
-log.info("통합 방 생성 시작: ruid={}, theme={}", ruid, theme);
-log.info("시나리오 생성 완료: {} 오브젝트", objectCount);
+log.info("통합 방 생성 시작: ruid={}, user_uuid={}, theme={}, difficulty={}",
+         ruid, request.getUuid(), request.getTheme(), request.getValidatedDifficulty());
+log.info("통합 시나리오 생성 완료. ruid: {}, 오브젝트 설명 {}개",
+         ruid, objectInstructions.size());
+log.info("마크다운 스크립트 Base64 인코딩 완료: {} 개의 스크립트", encodedScripts.size());
+
+// DEBUG: 상세 진행 상황
+log.debug("3D 모델 생성 요청 [{}]: name='{}', prompt='{}자'", index, name, prompt.length());
+log.debug("모델 추적 ID 추가: {} -> {}", objectName, trackingId);
 
 // WARN: 부분 실패 (계속 진행)
+log.warn("object_instructions[{}]에 필수 필드가 없습니다. 건너뜁니다.", i);
 log.warn("모델 생성 타임아웃 발생, 현재까지 완료된 결과만 수집");
+log.warn("GameManager 스크립트가 파싱되지 않았습니다");
 
 // ERROR: 치명적 오류
 log.error("통합 방 생성 중 시스템 오류 발생: ruid={}", ruid, e);
+log.error("모델 생성 실패: {} - {}", name, e.getMessage());
 ```
 {% endhint %}
 
@@ -329,19 +357,57 @@ log.error("통합 방 생성 중 시스템 오류 발생: ruid={}", ruid, e);
 ### 📊 **핵심 성능 지표**
 
 #### ⏱️ **평균 처리 시간**
-> **5-7분**
+> **${total.process.time.avg}**
 >
 > 전체 방탈출 생성 완료
 
 #### 🔄 **동시 처리**
-> **10개**
+> **${room.service.executor.threads}개**
 >
 > 3D 모델 병렬 생성
 
 #### ✅ **성공률**
-> **95%+**
+> **${overall.success.rate}**
 >
 > 에러 복구 포함
+
+#### ⏰ **타임아웃**
+> **${model.generation.timeout.minutes}분**
+>
+> 모델 생성 최대 대기
+
+---
+
+## 🎨 추가 기능 상세
+
+### 키워드 중복 제거
+
+```java
+private JsonArray createKeywordsArray(String[] keywords) {
+  JsonArray array = new JsonArray();
+  Set<String> uniqueKeywords = new LinkedHashSet<>(); // 순서 유지
+
+  for (String keyword : keywords) {
+    if (keyword != null && !keyword.trim().isEmpty()) {
+      uniqueKeywords.add(keyword.trim().toLowerCase());
+    }
+  }
+
+  for (String keyword : uniqueKeywords) {
+    array.add(keyword);
+  }
+
+  return array;
+}
+```
+
+### 스크립트 파일명 처리
+
+```java
+private String ensureFileExtension(String fileName) {
+  return fileName.endsWith(".cs") ? fileName : fileName + ".cs";
+}
+```
 
 ---
 

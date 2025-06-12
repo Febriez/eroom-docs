@@ -1,0 +1,140 @@
+# ERoom 프로젝트 메트릭 및 설정값
+# 이 파일의 모든 값은 GitBook 문서에서 참조됩니다
+
+# ===== 시간 관련 =====
+# AI 처리 시간
+scenario.generation.time.min=30초
+scenario.generation.time.avg=1-2분
+scenario.generation.time.max=3분
+
+script.generation.time.min=30초
+script.generation.time.avg=2-4분
+script.generation.time.max=4분
+
+# 3D 모델 생성 시간
+model.preview.time.min=1분
+model.preview.time.avg=2분
+model.preview.time.max=3분
+
+model.refine.time.min=3분
+model.refine.time.avg=4분
+model.refine.time.max=5분
+
+# 전체 프로세스
+total.process.time.min=5분
+total.process.time.avg=7-8분
+total.process.time.max=10분
+
+# 기존 개발 방식 (비교용)
+traditional.planning.time=2-4주
+traditional.modeling.time=4-8주
+traditional.programming.time=6-12주
+traditional.testing.time=2-4주
+traditional.total.time=3개월
+
+# ===== 성능 메트릭 =====
+# API 응답 시간
+api.root.response.time=< 5ms
+api.health.response.time=< 9ms
+api.create.response.time=< 50ms
+api.result.response.time=< 9ms
+api.queue.response.time=< 9ms
+
+# 서버 성능
+server.concurrent.connections=10,000+
+server.memory.usage=~50MB
+server.startup.time=< 1초
+server.response.latency=< 5ms
+
+# 시스템 설정
+queue.max.concurrent.requests=1
+queue.worker.threads=1
+room.service.executor.threads=10
+model.generation.timeout.minutes=10
+executor.shutdown.timeout.seconds=60
+
+# AI API 설정
+anthropic.model.name=claude-opus-4-20250514
+anthropic.max.tokens=16000
+anthropic.scenario.temperature=0.9
+anthropic.script.temperature=0.1
+
+# Meshy API 설정
+meshy.timeout.seconds=30
+meshy.max.polling.attempts=200
+meshy.polling.interval.ms=3000
+
+# ===== 비용 관련 =====
+# API 비용
+anthropic.cost.per.request=$0.06
+meshy.preview.cost=$0.05
+meshy.refine.cost=$0.15
+meshy.total.cost.per.model=$0.20
+
+# 월간 예상 비용
+monthly.anthropic.cost=$200
+monthly.meshy.cost=$300
+monthly.server.cost=$100
+monthly.total.cost=$600
+monthly.room.count=1500
+cost.per.room=$0.40
+
+# ===== 프로젝트 메트릭 =====
+# 개선 효과
+time.reduction.percentage=99.9%
+cost.reduction.percentage=95%
+team.size.reduction=5명 → 1명
+
+# 성공률
+scenario.generation.success.rate=99%+
+model.generation.success.rate=95%+
+overall.success.rate=95%+
+
+# ===== 기술 스택 버전 =====
+java.version=17
+undertow.version=latest
+unity.version=6
+firebase.version=latest
+
+# ===== 데이터 크기 =====
+request.data.avg.size=~1KB
+request.data.max.size=5KB
+scenario.data.avg.size=~10KB
+scenario.data.max.size=50KB
+script.data.avg.size=~5KB
+script.data.max.size=20KB
+response.data.avg.size=~50KB
+response.data.max.size=200KB
+model.metadata.avg.size=~2KB
+model.metadata.max.size=5KB
+
+# ===== 프로젝트 타임라인 =====
+project.start.date=2025년 5월 26일
+project.mvp.date=2025년 6월 13일
+project.release.date=2025년 7월 3일
+project.total.days=39일
+project.mvp.days=19일
+
+# ===== 제한 사항 =====
+rate.limit.create.per.minute=10
+rate.limit.result.per.minute=60
+rate.limit.health.per.minute=120
+
+# ===== 환경 변수 =====
+env.anthropic.key=ANTHROPIC_KEY
+env.meshy.key.1=MESHY_KEY_1
+env.meshy.key.2=MESHY_KEY_2
+env.meshy.key.3=MESHY_KEY_3
+env.auth.key=EROOM_PRIVATE_KEY
+
+# ===== 벤치마크 점수 =====
+claude.mmlu.score=88.7%
+claude.humaneval.score=92.0%
+claude.creative.score=95/100
+claude.response.time=1-3초
+
+undertow.rps=1.2M
+undertow.p99.latency=1.2ms
+
+meshy.quality.score=8.5/10
+meshy.api.stability=99.5%
