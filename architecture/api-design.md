@@ -11,13 +11,13 @@
 
 ## 📋 API 엔드포인트 요약
 
-| 메서드 | 경로 | 목적 | 응답 시간 |
-|--------|------|------|-----------|
-| `GET` | `/` | 서버 상태 확인 | < 10ms |
-| `GET` | `/health` | 상세 헬스체크 | < 20ms |
-| `POST` | `/room/create` | 룸 생성 요청 | < 100ms |
-| `GET` | `/room/result?ruid={id}` | 결과 조회 | < 50ms |
-| `GET` | `/queue/status` | 큐 상태 확인 | < 20ms |
+| 메서드  | 경로                     | 목적       | 응답 시간   |
+|------|------------------------|----------|---------|
+| GET  | /                      | 서버 상태 확인 | < 10ms  |
+| GET  | /health                | 상세 헬스체크  | < 20ms  |
+| POST | /room/create           | 룸 생성 요청  | < 100ms |
+| GET  | /room/result?ruid={id} | 결과 조회    | < 50ms  |
+| GET  | /queue/status          | 큐 상태 확인  | < 20ms  |
 
 ---
 
@@ -25,12 +25,13 @@
 
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 10px 0;">API Key 인증</h4>
-  <p>모든 API 요청에는 <code>Authorization</code> 헤더가 필요합니다.</p>
-  
+  <p>모든 API 요청에는 Authorization 헤더가 필요합니다.</p>
+
   ```http
   Authorization: your-api-key-here
   Content-Type: application/json; charset=utf-8
   ```
+
 </div>
 
 ---
@@ -41,11 +42,11 @@
 
 {% mermaid %}
 sequenceDiagram
-    participant Client
-    participant Server
-    participant Queue
-    participant AI Services
-    
+participant Client
+participant Server
+participant Queue
+participant AI Services
+
     Client->>Server: POST /room/create
     Server->>Queue: Add to queue
     Server-->>Client: { "ruid": "room_12345" }
@@ -64,7 +65,8 @@ sequenceDiagram
     
     Client->>Server: GET /room/result?ruid=room_12345
     Server-->>Client: { "status": "COMPLETED", data... }
-```
+
+{% endmermaid %}
 
 ---
 
@@ -75,49 +77,69 @@ sequenceDiagram
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
   <div>
     <h4>요청 (Request)</h4>
-    
-```json
-POST /room/create
 
+**POST /room/create**
+
+요청 본문:
+
+```json
 {
   "uuid": "user_12345",
   "theme": "우주정거장",
-  "keywords": ["미래", "과학"],
+  "keywords": [
+    "미래",
+    "과학"
+  ],
   "difficulty": "normal",
   "room_prefab": "https://example.com/prefab.fbx"
 }
 ```
+
   </div>
   <div>
     <h4>응답 (Response)</h4>
-    
-```json
-HTTP/1.1 202 Accepted
 
+**HTTP/1.1 202 Accepted**
+
+응답 본문:
+
+```json
 {
   "ruid": "room_a1b2c3d4e5f6",
   "status": "Queued",
   "message": "Poll /room/result?ruid=..."
 }
 ```
+
   </div>
 </div>
 
 ### 최종 완료 응답
 
-```json
-GET /room/result?ruid=room_a1b2c3d4e5f6
+**GET /room/result?ruid=room_a1b2c3d4e5f6**
 
+```json
 {
   "uuid": "user_12345",
   "ruid": "room_a1b2c3d4e5f6",
   "theme": "우주정거장",
   "difficulty": "normal",
-  "keywords": ["미래", "과학"],
+  "keywords": [
+    "미래",
+    "과학"
+  ],
   "room_prefab": "https://example.com/prefab.fbx",
   "scenario": {
-    "scenario_data": { ... },
-    "object_instructions": [ ... ]
+    "scenario_data": {
+      "theme": "우주정거장",
+      "description": "버려진 우주정거장 탈출 시나리오"
+    },
+    "object_instructions": [
+      {
+        "name": "GameManager",
+        "type": "game_manager"
+      }
+    ]
   },
   "scripts": {
     "GameManager.cs": "base64_encoded_content",
@@ -145,22 +167,22 @@ GET /room/result?ruid=room_a1b2c3d4e5f6
       <th>다음 액션</th>
     </tr>
     <tr>
-      <td><code>QUEUED</code></td>
+      <td>QUEUED</td>
       <td>큐에 대기 중</td>
       <td>계속 폴링</td>
     </tr>
     <tr>
-      <td><code>PROCESSING</code></td>
+      <td>PROCESSING</td>
       <td>AI 처리 중</td>
       <td>계속 폴링</td>
     </tr>
     <tr>
-      <td><code>COMPLETED</code></td>
+      <td>COMPLETED</td>
       <td>성공적으로 완료</td>
       <td>결과 사용</td>
     </tr>
     <tr>
-      <td><code>FAILED</code></td>
+      <td>FAILED</td>
       <td>처리 실패</td>
       <td>에러 처리</td>
     </tr>
@@ -171,14 +193,14 @@ GET /room/result?ruid=room_a1b2c3d4e5f6
 
 ## 📊 HTTP 상태 코드 활용
 
-| HTTP 코드 | 의미 | 사용 시나리오 |
-|-----------|------|---------------|
-| `200 OK` | 성공 | GET 요청 성공 |
-| `202 Accepted` | 수락됨 | 비동기 작업 시작 |
-| `400 Bad Request` | 잘못된 요청 | 필수 파라미터 누락 |
-| `401 Unauthorized` | 인증 실패 | API 키 누락/오류 |
-| `404 Not Found` | 없음 | ruid가 존재하지 않음 |
-| `500 Internal Server Error` | 서버 오류 | 예상치 못한 오류 |
+| HTTP 코드                   | 의미     | 사용 시나리오       |
+|---------------------------|--------|---------------|
+| 200 OK                    | 성공     | GET 요청 성공     |
+| 202 Accepted              | 수락됨    | 비동기 작업 시작     |
+| 400 Bad Request           | 잘못된 요청 | 필수 파라미터 누락    |
+| 401 Unauthorized          | 인증 실패  | API 키 누락/오류   |
+| 404 Not Found             | 없음     | ruid가 존재하지 않음 |
+| 500 Internal Server Error | 서버 오류  | 예상치 못한 오류     |
 
 ---
 
@@ -208,25 +230,25 @@ GET /room/result?ruid=room_a1b2c3d4e5f6
 ```javascript
 // 클라이언트 폴링 예제
 const pollInterval = {
-  initial: 2000,    // 2초
-  max: 10000,       // 10초
-  multiplier: 1.5   // 점진적 증가
+    initial: 2000,    // 2초
+    max: 10000,       // 10초
+    multiplier: 1.5   // 점진적 증가
 };
 
 async function pollResult(ruid) {
-  let interval = pollInterval.initial;
-  
-  while (true) {
-    const result = await fetch(`/room/result?ruid=${ruid}`);
-    const data = await result.json();
-    
-    if (data.status === 'COMPLETED' || data.status === 'FAILED') {
-      return data;
+    let interval = pollInterval.initial;
+
+    while (true) {
+        const result = await fetch(`/room/result?ruid=${ruid}`);
+        const data = await result.json();
+
+        if (data.status === 'COMPLETED' || data.status === 'FAILED') {
+            return data;
+        }
+
+        await sleep(interval);
+        interval = Math.min(interval * pollInterval.multiplier, pollInterval.max);
     }
-    
-    await sleep(interval);
-    interval = Math.min(interval * pollInterval.multiplier, pollInterval.max);
-  }
 }
 ```
 

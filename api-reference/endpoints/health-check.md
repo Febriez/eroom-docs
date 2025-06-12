@@ -10,9 +10,7 @@
 ## 요청 상세
 
 ### HTTP 메서드
-```
-GET /
-```
+    GET /
 
 ### 필수 헤더
 ```http
@@ -35,10 +33,10 @@ Authorization: your_api_key
 }
 ```
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `status` | String | 서버 상태 ("online") |
-| `message` | String | 상태 메시지 |
+| 필드      | 타입     | 설명               |
+|---------|--------|------------------|
+| status  | String | 서버 상태 ("online") |
+| message | String | 상태 메시지           |
 
 ### 에러 응답 (401 Unauthorized)
 
@@ -60,9 +58,7 @@ Authorization: your_api_key
 ## 요청 상세
 
 ### HTTP 메서드
-```
-GET /health
-```
+    GET /health
 
 ### 필수 헤더
 ```http
@@ -90,14 +86,14 @@ Authorization: your_api_key
 }
 ```
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `status` | String | 서버 건강 상태 |
-| `queue` | Object | 큐 상태 정보 |
-| `queue.queued` | Integer | 대기 중인 요청 수 |
-| `queue.active` | Integer | 현재 처리 중인 요청 수 |
-| `queue.completed` | Integer | 완료된 총 요청 수 |
-| `queue.maxConcurrent` | Integer | 최대 동시 처리 가능 수 |
+| 필드                  | 타입      | 설명            |
+|---------------------|---------|---------------|
+| status              | String  | 서버 건강 상태      |
+| queue               | Object  | 큐 상태 정보       |
+| queue.queued        | Integer | 대기 중인 요청 수    |
+| queue.active        | Integer | 현재 처리 중인 요청 수 |
+| queue.completed     | Integer | 완료된 총 요청 수    |
+| queue.maxConcurrent | Integer | 최대 동시 처리 가능 수 |
 
 ---
 

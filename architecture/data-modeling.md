@@ -11,12 +11,12 @@
 
 ## 🔄 데이터 플로우 다이어그램
 
-```mermaid
+{% mermaid %}
 graph LR
-    subgraph "Request Models"
-        RCR[RoomCreationRequest]
-    end
-    
+subgraph "Request Models"
+RCR[RoomCreationRequest]
+end
+
     subgraph "Internal Models"
         QR[QueuedRequest]
         JS[JobState]
@@ -38,7 +38,8 @@ graph LR
     style RCR fill:#4a90e2
     style RCR2 fill:#4caf50
     style JS fill:#f39c12
-```
+
+{% endmermaid %}
 
 ---
 
@@ -50,14 +51,15 @@ graph LR
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">룸 생성 요청 데이터</h4>
-  
-  | 필드 | 타입 | 필수 | 설명 |
-  |------|------|------|------|
-  | `uuid` | String | ✅ | 사용자 고유 식별자 |
-  | `theme` | String | ✅ | 방탈출 테마 (예: "우주정거장") |
-  | `keywords` | String[] | ✅ | 키워드 배열 (최소 1개) |
-  | `difficulty` | String | ❌ | 난이도 (easy/normal/hard) |
-  | `room_prefab` | String | ✅ | Unity 프리팹 URL |
+
+| 필드          | 타입       | 필수 | 설명                     |
+  |-------------|----------|----|------------------------|
+| uuid        | String   | ✅  | 사용자 고유 식별자             |
+| theme       | String   | ✅  | 방탈출 테마 (예: "우주정거장")    |
+| keywords    | String[] | ✅  | 키워드 배열 (최소 1개)         |
+| difficulty  | String   | ❌  | 난이도 (easy/normal/hard) |
+| room_prefab | String   | ✅  | Unity 프리팹 URL          |
+
 </div>
 
 ```java
@@ -66,7 +68,7 @@ public String getValidatedDifficulty() {
     if (difficulty == null || difficulty.trim().isEmpty()) {
         return "normal"; // 기본값
     }
-    
+
     String normalized = difficulty.trim().toLowerCase();
     return switch (normalized) {
         case "easy", "normal", "hard" -> normalized;
@@ -83,26 +85,27 @@ public String getValidatedDifficulty() {
 
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">비동기 작업 상태 추적</h4>
-  
+
   ```java
   public record JobState(
-      Status status,      // QUEUED, PROCESSING, COMPLETED, FAILED
-      JsonObject result   // 최종 결과 또는 에러 정보
-  )
+        Status status,      // QUEUED, PROCESSING, COMPLETED, FAILED
+        JsonObject result   // 최종 결과 또는 에러 정보
+) {
+}
   ```
-  
+
   <div style="margin-top: 15px;">
     <strong>상태 전이도:</strong>
-    
-  ```mermaid
-  stateDiagram-v2
-      [*] --> QUEUED
-      QUEUED --> PROCESSING
-      PROCESSING --> COMPLETED
-      PROCESSING --> FAILED
-      COMPLETED --> [*]
-      FAILED --> [*]
-  ```
+
+{% mermaid %}
+stateDiagram-v2
+[*] --> QUEUED
+QUEUED --> PROCESSING
+PROCESSING --> COMPLETED
+PROCESSING --> FAILED
+COMPLETED --> [*]
+FAILED --> [*]
+{% endmermaid %}
   </div>
 </div>
 
@@ -110,20 +113,22 @@ public String getValidatedDifficulty() {
 
 ```java
 private record QueuedRoomRequest(
-    String ruid,                    // 서버 생성 고유 ID
-    RoomCreationRequest request     // 원본 요청 데이터
-)
+        String ruid,                    // 서버 생성 고유 ID
+        RoomCreationRequest request     // 원본 요청 데이터
+) {
+}
 ```
 
 #### ModelGenerationResult
 
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">3D 모델 생성 결과</h4>
-  
-  | 필드 | 타입 | 설명 |
-  |------|------|------|
-  | `objectName` | String | 오브젝트 이름 (예: "SpaceHelmet") |
-  | `trackingId` | String | Meshy AI 추적 ID 또는 에러 코드 |
+
+| 필드         | 타입     | 설명                         |
+  |------------|--------|----------------------------|
+| objectName | String | 오브젝트 이름 (예: "SpaceHelmet") |
+| trackingId | String | Meshy AI 추적 ID 또는 에러 코드    |
+
 </div>
 
 ---
@@ -134,7 +139,7 @@ private record QueuedRoomRequest(
 
 <div style="background: #fff3cd; padding: 25px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">완전한 룸 생성 결과</h4>
-  
+
   <table style="width: 100%;">
     <tr>
       <th>필드</th>
@@ -142,42 +147,42 @@ private record QueuedRoomRequest(
       <th>설명</th>
     </tr>
     <tr>
-      <td><code>uuid</code></td>
+      <td>uuid</td>
       <td>String</td>
       <td>요청한 사용자 ID</td>
     </tr>
     <tr>
-      <td><code>ruid</code></td>
+      <td>ruid</td>
       <td>String</td>
       <td>룸 고유 ID</td>
     </tr>
     <tr>
-      <td><code>theme</code></td>
+      <td>theme</td>
       <td>String</td>
       <td>생성된 룸 테마</td>
     </tr>
     <tr>
-      <td><code>scenario</code></td>
+      <td>scenario</td>
       <td>JsonObject</td>
       <td>AI 생성 시나리오 데이터</td>
     </tr>
     <tr>
-      <td><code>scripts</code></td>
+      <td>scripts</td>
       <td>JsonObject</td>
       <td>Base64 인코딩된 C# 스크립트들</td>
     </tr>
     <tr>
-      <td><code>model_tracking</code></td>
+      <td>model_tracking</td>
       <td>JsonObject</td>
       <td>3D 모델 추적 ID 매핑</td>
     </tr>
     <tr>
-      <td><code>success</code></td>
+      <td>success</td>
       <td>Boolean</td>
       <td>처리 성공 여부</td>
     </tr>
     <tr>
-      <td><code>timestamp</code></td>
+      <td>timestamp</td>
       <td>String</td>
       <td>완료 시간</td>
     </tr>
@@ -189,9 +194,9 @@ private record QueuedRoomRequest(
 ```json
 {
   "ruid": "room_12345",
-  "status": "PROCESSING"  // QUEUED, PROCESSING, COMPLETED, FAILED
+  "status": "PROCESSING"
 }
-{% endmermaid %}
+```
 
 #### ErrorResponse (에러 응답)
 
@@ -211,10 +216,10 @@ private record QueuedRoomRequest(
 
 {% mermaid %}
 erDiagram
-    RoomCreationRequest ||--o{ QueuedRoomRequest : "queued as"
-    QueuedRoomRequest ||--|| JobState : "tracked by"
-    JobState ||--|| RoomCreationResponse : "results in"
-    
+RoomCreationRequest ||--o{ QueuedRoomRequest : "queued as"
+QueuedRoomRequest ||--|| JobState : "tracked by"
+JobState ||--|| RoomCreationResponse : "results in"
+
     RoomCreationRequest {
         string uuid
         string theme
@@ -236,7 +241,8 @@ erDiagram
         json model_tracking
         boolean success
     }
-```
+
+{% endmermaid %}
 
 ---
 
@@ -246,7 +252,7 @@ erDiagram
 
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">시나리오 데이터 구조</h4>
-  
+
 ```json
 {
   "scenario_data": {
@@ -272,26 +278,27 @@ erDiagram
   ]
 }
 ```
+
 </div>
 
 ### Scripts 객체 구조
 
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">스크립트 저장 구조</h4>
-  
+
   <p>모든 스크립트는 Base64로 인코딩되어 전송됩니다:</p>
-  
+
 ```json
 {
-  "GameManager.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFN5c3RlbS5Db2xsZWN0aW9uczsK...",
+  "GameManager.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFN5c3RlbS5Db2xsZWN0aW9uczoK...",
   "SpaceHelmet.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFVuaXR5RW5naW5lLklucHV0U3lz...",
   "DoorController.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnB1YmxpYyBjbGFzcyBEb29yQ29udHJvbGxl..."
 }
 ```
-  
+
   <div style="margin-top: 15px; padding: 10px; background: #ede7f6; border-radius: 5px;">
     <strong>💡 디코딩 예제:</strong>
-    <code>string decodedScript = Encoding.UTF8.GetString(Convert.FromBase64String(base64String));</code>
+    string decodedScript = Encoding.UTF8.GetString(Convert.FromBase64String(base64String));
   </div>
 </div>
 
@@ -301,13 +308,13 @@ erDiagram
 
 ### 입력 검증
 
-| 필드 | 검증 규칙 |
-|------|-----------|
-| `uuid` | 비어있지 않음, 공백 제거 |
-| `theme` | 비어있지 않음, 최대 100자 |
-| `keywords` | 최소 1개, 각 키워드 비어있지 않음 |
-| `difficulty` | easy/normal/hard 중 하나 |
-| `room_prefab` | https:// 로 시작하는 유효한 URL |
+| 필드          | 검증 규칙                   |
+|-------------|-------------------------|
+| uuid        | 비어있지 않음, 공백 제거          |
+| theme       | 비어있지 않음, 최대 100자        |
+| keywords    | 최소 1개, 각 키워드 비어있지 않음    |
+| difficulty  | easy/normal/hard 중 하나   |
+| room_prefab | https:// 로 시작하는 유효한 URL |
 
 ### 출력 검증
 
@@ -315,16 +322,16 @@ erDiagram
 // 시나리오 검증
 private void validateScenario(JsonObject scenario) {
     // 필수 필드 확인
-    if (!scenario.has("scenario_data") || 
-        !scenario.has("object_instructions")) {
+    if (!scenario.has("scenario_data") ||
+            !scenario.has("object_instructions")) {
         throw new RuntimeException("Invalid scenario structure");
     }
-    
+
     // GameManager 확인
     JsonArray objects = scenario.getAsJsonArray("object_instructions");
-    if (objects.isEmpty() || 
-        !objects.get(0).getAsJsonObject().get("name")
-                .getAsString().equals("GameManager")) {
+    if (objects.isEmpty() ||
+            !objects.get(0).getAsJsonObject().get("name")
+                    .getAsString().equals("GameManager")) {
         throw new RuntimeException("GameManager must be first object");
     }
 }
@@ -338,36 +345,35 @@ private void validateScenario(JsonObject scenario) {
 
 <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">클라이언트 측 데이터 저장 구조</h4>
-  
-```
-firestore/
-├── users/
-│   └── {uuid}/
-│       ├── profile
-│       └── rooms/
-│           └── {ruid}/
-│               ├── metadata
-│               ├── scenario
-│               ├── scripts
-│               └── models
-└── global/
-    └── statistics/
-        ├── total_rooms
-        └── daily_usage
-```
+
+    firestore/
+    ├── users/
+    │   └── {uuid}/
+    │       ├── profile
+    │       └── rooms/
+    │           └── {ruid}/
+    │               ├── metadata
+    │               ├── scenario
+    │               ├── scripts
+    │               └── models
+    └── global/
+        └── statistics/
+            ├── total_rooms
+            └── daily_usage
+
 </div>
 
 ---
 
 ## 📊 데이터 크기 예측
 
-| 데이터 유형 | 평균 크기 | 최대 크기 |
-|------------|-----------|-----------|
-| 요청 데이터 | ~1 KB | 5 KB |
-| 시나리오 | ~10 KB | 50 KB |
-| 스크립트 (각) | ~5 KB | 20 KB |
-| 전체 응답 | ~50 KB | 200 KB |
-| 3D 모델 메타데이터 | ~2 KB | 5 KB |
+| 데이터 유형      | 평균 크기  | 최대 크기  |
+|-------------|--------|--------|
+| 요청 데이터      | ~1 KB  | 5 KB   |
+| 시나리오        | ~10 KB | 50 KB  |
+| 스크립트 (각)    | ~5 KB  | 20 KB  |
+| 전체 응답       | ~50 KB | 200 KB |
+| 3D 모델 메타데이터 | ~2 KB  | 5 KB   |
 
 ---
 

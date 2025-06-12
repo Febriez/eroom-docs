@@ -10,9 +10,7 @@
 ## 요청 상세
 
 ### HTTP 메서드
-```
-GET /room/result?ruid={room_unique_id}
-```
+    GET /room/result?ruid={room_unique_id}
 
 ### 필수 헤더
 ```http
@@ -23,7 +21,7 @@ Authorization: your_api_key
 
 | 파라미터 | 타입 | 필수 | 설명 |
 |----------|------|------|------|
-| `ruid` | String | ✅ | 룸 고유 식별자 (POST /room/create 응답에서 받은 값) |
+| ruid | String | ✅ | 룸 고유 식별자 (POST /room/create 응답에서 받은 값) |
 
 ---
 
@@ -71,7 +69,7 @@ Authorization: your_api_key
       {
         "name": "GameManager",
         "type": "game_manager",
-        "functional_description": "전체 게임 상태 관리..."
+        "functional_description": "Singleton GameManager with: Dictionary<string,GameObject> registeredObjects, Dictionary<string,bool> puzzleStates, inventory system..."
       },
       {
         "name": "PowerGenerator",
@@ -84,12 +82,12 @@ Authorization: your_api_key
         "dependencies": "없음",
         "success_outcome": "main_power_on",
         "failure_feedback": "발전기가 작동하지 않습니다...",
-        "hint_messages": ["배전반을 확인해보세요", "...]
+        "hint_messages": ["배전반을 확인해보세요", "..."]
       }
     ]
   },
   "scripts": {
-    "GameManager.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFN5c3RlbS5Db2xsZWN0aW9uczsK...",
+    "GameManager.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFN5c3RlbS5Db2xsZWN0aW9uczoK...",
     "PowerGenerator.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFVuaXR5RW5naW5lLklucHV0U3lz...",
     "OxygenController.cs": "dXNpbmcgVW5pdHlFbmdpbmU7CnB1YmxpYyBjbGFzcyBPeHlnZW5Db250cm9s..."
   },
@@ -143,12 +141,12 @@ Authorization: your_api_key
 
 | 필드 | 설명 |
 |------|------|
-| `scenario_data` | 전체 시나리오 정보 |
-| `scenario_data.theme` | AI가 해석한 테마 |
-| `scenario_data.description` | 배경 스토리 |
-| `scenario_data.escape_condition` | 탈출 조건 |
-| `scenario_data.puzzle_flow` | 퍼즐 진행 순서 |
-| `object_instructions` | 각 오브젝트별 상세 정보 배열 |
+| scenario_data | 전체 시나리오 정보 |
+| scenario_data.theme | AI가 해석한 테마 |
+| scenario_data.description | 배경 스토리 |
+| scenario_data.escape_condition | 탈출 조건 |
+| scenario_data.puzzle_flow | 퍼즐 진행 순서 |
+| object_instructions | 각 오브젝트별 상세 정보 배열 |
 
 ### scripts 객체
 
@@ -333,29 +331,29 @@ function processRoom(roomData) {
 - 필요한 경우 클라이언트에서 결과를 저장해두세요
 
 ### 2. 폴링 최적화
-```
-초기 간격: 2초
-증가율: 1.5배
-최대 간격: 10초
-권장 타임아웃: 15분
-```
+    초기 간격: 2초
+    증가율: 1.5배
+    최대 간격: 10초
+    권장 타임아웃: 15분
 
 ### 3. 상태 전이
-```mermaid
+
+{% mermaid %}
 stateDiagram-v2
-    [*] --> QUEUED: 요청 등록
-    QUEUED --> PROCESSING: 처리 시작
-    PROCESSING --> COMPLETED: 성공
-    PROCESSING --> FAILED: 실패
-    COMPLETED --> [*]: 결과 조회
-    FAILED --> [*]: 에러 확인
-```
+[*] --> QUEUED: 요청 등록
+QUEUED --> PROCESSING: 처리 시작
+PROCESSING --> COMPLETED: 성공
+PROCESSING --> FAILED: 실패
+COMPLETED --> [*]: 결과 조회
+FAILED --> [*]: 에러 확인
+{% endmermaid %}
 
 ---
 
 ## 데이터 활용 가이드
 
 ### 1. 스크립트 통합
+
 ```csharp
 // Base64 디코딩 후 Unity 프로젝트에 저장
 string decodedScript = Encoding.UTF8.GetString(
@@ -370,12 +368,14 @@ AssetDatabase.Refresh();
 ```
 
 ### 2. 3D 모델 다운로드
+
 ```csharp
 // model_tracking ID를 사용하여 Meshy API에서 모델 다운로드
 // (Meshy API 문서 참조)
 ```
 
 ### 3. 시나리오 적용
+
 ```csharp
 // scenario_data를 게임 설정에 적용
 GameManager.Instance.SetupScenario(response.scenario.scenario_data);
@@ -385,12 +385,12 @@ GameManager.Instance.SetupScenario(response.scenario.scenario_data);
 
 ## 문제 해결
 
-| 문제 | 원인 | 해결 방법 |
-|------|------|-----------|
-| 404 Not Found | ruid가 잘못됨 | ruid 값 확인 |
-| 결과가 비어있음 | 이미 조회됨 | 새로운 요청 생성 |
-| 계속 PROCESSING | 처리 지연 | 더 기다리거나 로그 확인 |
-| FAILED 상태 | 처리 중 오류 | error 메시지 확인 |
+| 문제            | 원인        | 해결 방법         |
+|---------------|-----------|---------------|
+| 404 Not Found | ruid가 잘못됨 | ruid 값 확인     |
+| 결과가 비어있음      | 이미 조회됨    | 새로운 요청 생성     |
+| 계속 PROCESSING | 처리 지연     | 더 기다리거나 로그 확인 |
+| FAILED 상태     | 처리 중 오류   | error 메시지 확인  |
 
 ---
 

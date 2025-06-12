@@ -24,18 +24,18 @@ Unity6 escape room scenario generator. INPUT: uuid, puid, theme, keywords array,
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔍 각 구성 요소의 역할</h4>
 
-| 구성 요소 | 목적 | 유도하는 결과 |
-  |-----------|------|---------------|
-| **Unity6 specific** | 최신 엔진 기능 활용 | 현대적인 게임 메커니즘 |
-| **INPUT 정의** | 명확한 입력 형식 | 일관된 요청 처리 |
-| **KEYWORD EXPANSION** | 자동 키워드 확장 | 난이도별 충분한 콘텐츠 |
-| **OBJECT COUNT** | 난이도별 오브젝트 수 | 적절한 게임 복잡도 |
-| **PUZZLE DESIGN** | 퍼즐 난이도 가이드 | 균형잡힌 게임플레이 |
-| **INTERACTION CONSTRAINTS** | 물리적 상호작용만 | Unity 구현 가능성 보장 |
-| **TECHNICAL REQUIREMENTS** | Unity6 컴포넌트 제한 | 호환성 확보 |
-| **LANGUAGE** | 한국어/영어 구분 | 현지화된 게임 경험 |
-| **NAMING** | PascalCase + 예약어 회피 | 컴파일 오류 방지 |
-| **JSON STRUCTURE** | 정확한 출력 형식 | 파싱 가능한 구조화된 데이터 |
+| 구성 요소                       | 목적                  | 유도하는 결과         |
+  |-----------------------------|---------------------|-----------------|
+| **Unity6 specific**         | 최신 엔진 기능 활용         | 현대적인 게임 메커니즘    |
+| **INPUT 정의**                | 명확한 입력 형식           | 일관된 요청 처리       |
+| **KEYWORD EXPANSION**       | 자동 키워드 확장           | 난이도별 충분한 콘텐츠    |
+| **OBJECT COUNT**            | 난이도별 오브젝트 수         | 적절한 게임 복잡도      |
+| **PUZZLE DESIGN**           | 퍼즐 난이도 가이드          | 균형잡힌 게임플레이      |
+| **INTERACTION CONSTRAINTS** | 물리적 상호작용만           | Unity 구현 가능성 보장 |
+| **TECHNICAL REQUIREMENTS**  | Unity6 컴포넌트 제한      | 호환성 확보          |
+| **LANGUAGE**                | 한국어/영어 구분           | 현지화된 게임 경험      |
+| **NAMING**                  | PascalCase + 예약어 회피 | 컴파일 오류 방지       |
+| **JSON STRUCTURE**          | 정확한 출력 형식           | 파싱 가능한 구조화된 데이터 |
 </div>
 
 ---
@@ -55,16 +55,16 @@ Unity6 C# escape room script generator. INPUT: scenario JSON with object_instruc
 <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">⚡ 최적화 포인트</h4>
 
-| 지시 사항 | 목적 | 결과 |
-  |-----------|------|------|
-| **CRITICAL REQUIREMENT** | GameManager 우선 생성 강제 | 의존성 문제 해결 |
-| **Unity6 FEATURES** | 최신 API 사용 유도 | 현대적 코드 품질 |
-| **COMPONENTS ALLOWED** | 허용 컴포넌트 명시 | 구현 가능성 보장 |
-| **FORBIDDEN** | 금지 항목 명시 | 복잡도 제한 |
-| **OUTPUT FORMAT** | 구분자 형식 지정 | 정확한 파싱 가능 |
-| **GAMEMANAGER REQUIREMENTS** | 필수 메서드 정의 | 일관된 게임 아키텍처 |
-| **OBJECT SCRIPT REQUIREMENTS** | 공통 기능 정의 | 통일된 상호작용 패턴 |
-| **CODE STYLE** | 코딩 스타일 가이드 | 읽기 쉬운 유지보수 가능 코드 |
+| 지시 사항                          | 목적                   | 결과               |
+  |--------------------------------|----------------------|------------------|
+| **CRITICAL REQUIREMENT**       | GameManager 우선 생성 강제 | 의존성 문제 해결        |
+| **Unity6 FEATURES**            | 최신  API 사용 유도        | 현대적 코드 품질        |
+| **COMPONENTS ALLOWED**         | 허용 컴포넌트 명시           | 구현 가능성 보장        |
+| **FORBIDDEN**                  | 금지 항목 명시             | 복잡도 제한           |
+| **OUTPUT FORMAT**              | 구분자 형식 지정            | 정확한 파싱 가능        |
+| **GAMEMANAGER REQUIREMENTS**   | 필수 메서드 정의            | 일관된 게임 아키텍처      |
+| **OBJECT SCRIPT REQUIREMENTS** | 공통 기능 정의             | 통일된 상호작용 패턴      |
+| **CODE STYLE**                 | 코딩 스타일 가이드           | 읽기 쉬운 유지보수 가능 코드 |
 </div>
 
 ---
@@ -143,10 +143,10 @@ Korean for failure_feedback and hint_messages (mysterious escape room atmosphere
       "scriptTemperature": 0.1
     }
 
-| 작업 | Temperature | 이유 |
-  |------|-------------|------|
-| **시나리오 생성** | 0.9 (높음) | 다양하고 창의적인 퍼즐과 스토리 |
-| **스크립트 생성** | 0.1 (낮음) | 문법적으로 정확하고 일관된 코드 |
+| 작업          | Temperature | 이유                |
+  |-------------|-------------|-------------------|
+| **시나리오 생성** | 0.9 (높음)    | 다양하고 창의적인 퍼즐과 스토리 |
+| **스크립트 생성** | 0.1 (낮음)    | 문법적으로 정확하고 일관된 코드 |
 </div>
 
 ---
