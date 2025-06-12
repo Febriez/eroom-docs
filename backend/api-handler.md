@@ -30,7 +30,7 @@ public class ApiHandler {
 {% hint style="success" %}
 #### 🔗 **컴포넌트 의존성**
 
-```mermaid
+{% mermaid %}
 graph TD
     A[ApiHandler] --> B[Gson]
     A --> C[QueueManager]
@@ -191,7 +191,7 @@ exchange.getRequestReceiver().receiveFullString((httpExchange, message) -> {
 }, (httpExchange, e) -> {
     // 에러 처리
 });
-```
+{% endmermaid %}
 
 **장점:**
 - 스레드 블로킹 없음

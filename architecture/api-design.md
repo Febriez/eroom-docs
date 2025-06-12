@@ -39,7 +39,7 @@
 
 ### 룸 생성 요청 → 결과 조회 플로우
 
-```mermaid
+{% mermaid %}
 sequenceDiagram
     participant Client
     participant Server

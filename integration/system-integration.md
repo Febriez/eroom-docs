@@ -4,7 +4,7 @@
 
 ### 전체 플로우 테스트
 
-```mermaid
+{% mermaid %}
 graph LR
     A[Unity 시작] --> B[API 키 설정]
     B --> C[룸 생성 요청]
@@ -20,7 +20,7 @@ graph LR
     style C fill:#4a90e2
     style G fill:#4caf50
     style J fill:#f39c12
-```
+{% endmermaid %}
 
 ---
 

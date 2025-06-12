@@ -11,7 +11,7 @@
 
 ## 📊 기술 스택 전체 구조
 
-```mermaid
+{% mermaid %}
 graph TB
   subgraph "Frontend Technologies"
     U[Unity6 - Game Engine]
@@ -47,7 +47,7 @@ graph TB
   style CL fill:#4a90e2
   style ME fill:#4a90e2
   style FB fill:#f39c12
-```
+{% endmermaid %}
 
 ---
 
@@ -199,32 +199,32 @@ graph TB
 
 ## 🔗 기술 통합 다이어그램
 
-```mermaid
+{% mermaid %}
 sequenceDiagram
     participant C as Client
     participant S as Server
     participant CL as Claude AI
     participant ME as Meshy AI
     participant FB as Firebase
-    
+
     C->>S: POST /room/create
     S->>S: Queue Request
     S-->>C: Return ruid
-    
+
     S->>CL: Generate Scenario
     CL-->>S: Scenario JSON
-    
+
     S->>CL: Generate Scripts
     CL-->>S: CSharp Scripts
-    
+
     S->>ME: Generate 3D Models
     ME-->>S: Model IDs
-    
+
     S->>FB: Store Result
-    
+
     C->>S: GET /room/result
     S-->>C: Complete Data
-```
+{% endmermaid %}
 
 ---
 

@@ -43,7 +43,7 @@
 
 ### 전체 생성 플로우
 
-```mermaid
+{% mermaid %}
 flowchart TB
     A[텍스트 설명] --> B[Preview 생성]
     B --> C{상태 확인}
@@ -62,7 +62,7 @@ flowchart TB
     style E fill:#4a90e2
     style H fill:#4caf50
     style I fill:#e74c3c
-```
+{% endmermaid %}
 
 ---
 

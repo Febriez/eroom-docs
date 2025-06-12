@@ -13,7 +13,7 @@
 
 ### 시스템 구성도
 
-```mermaid
+{% mermaid %}
 graph TB
     subgraph "Client Side"
         U[Unity Client]
@@ -229,7 +229,7 @@ echo "Server started with PID: $(cat server.pid)"
         <appender-ref ref="FILE" />
     </root>
 </configuration>
-```
+{% endmermaid %}
 
 ### 모니터링 대시보드
 

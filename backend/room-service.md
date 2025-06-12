@@ -11,7 +11,7 @@
 
 ## 🔄 전체 처리 플로우
 
-```mermaid
+{% mermaid %}
 flowchart TB
     subgraph "요청 처리"
         A[RoomCreationRequest] --> B[검증]
@@ -23,11 +23,11 @@ flowchart TB
         F --> G
         G --> H[최종 응답]
     end
-    
+
     style C fill:#4a90e2
     style D fill:#e74c3c
     style E fill:#4a90e2
-```
+{% endmermaid %}
 
 ---
 
@@ -132,24 +132,24 @@ public class DefaultScenarioValidator implements ScenarioValidator {
 {% hint style="warning" %}
 #### 🎨 **병렬 모델 생성 및 실패 추적**
 
-```mermaid
+{% mermaid %}
 graph LR
     A[Object Instructions] --> B[GameManager 제외]
     B --> C[병렬 생성 시작]
-    
+
     C --> D1[Model 1]
     C --> D2[Model 2]
     C --> D3[Model N]
-    
+
     D1 --> E[CompletableFuture]
     D2 --> E
     D3 --> E
-    
+
     E --> F[최대 10분 대기]
     F --> G{결과 수집}
     G -->|성공| H[tracking에 추가]
     G -->|실패| I[failed_models에 추가]
-```
+{% endmermaid %}
 
 **실패 추적 메커니즘:**
 - `error-` 접두사: 생성 실패

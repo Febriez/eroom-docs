@@ -121,7 +121,7 @@ graph TB
 
 ### 성공적인 인증
 
-```mermaid
+{% mermaid %}
 sequenceDiagram
     participant Client
     participant Filter
@@ -206,7 +206,7 @@ server = Undertow.builder()
     .addHttpListener(port, "0.0.0.0")
     .setHandler(apiKeyProtectedHandler)  // 모든 요청이 필터 통과
     .build();
-```
+{% endmermaid %}
 
 ### 로깅 전략
 

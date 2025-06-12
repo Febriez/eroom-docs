@@ -13,7 +13,7 @@
 
 ### 전체 통신 플로우
 
-```mermaid
+{% mermaid %}
 sequenceDiagram
     participant Unity as Unity Client
     participant Server as ERoom Server

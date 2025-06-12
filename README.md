@@ -47,7 +47,7 @@ ERoom은 **Anthropic Claude AI**와 **Meshy 3D AI**를 활용하여 방탈출 �
 
 ## 🔄 시스템 워크플로우
 
-```mermaid
+{% mermaid %}
 graph LR
   A[Unity 클라이언트] --> B[HTTP 요청]
   B --> C[서버 큐 등록]
@@ -61,7 +61,7 @@ graph LR
   style D fill: #4a90e2
   style E fill: #f39c12
   style F fill: #27ae60
-```
+{% endmermaid %}
 
 ---
 

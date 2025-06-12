@@ -191,7 +191,7 @@ private record QueuedRoomRequest(
   "ruid": "room_12345",
   "status": "PROCESSING"  // QUEUED, PROCESSING, COMPLETED, FAILED
 }
-```
+{% endmermaid %}
 
 #### ErrorResponse (에러 응답)
 
@@ -209,7 +209,7 @@ private record QueuedRoomRequest(
 
 ## 🔗 데이터 관계도
 
-```mermaid
+{% mermaid %}
 erDiagram
     RoomCreationRequest ||--o{ QueuedRoomRequest : "queued as"
     QueuedRoomRequest ||--|| JobState : "tracked by"

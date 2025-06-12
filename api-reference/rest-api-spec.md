@@ -8,9 +8,7 @@
 </div>
 
 ### Base URL
-```
-http://localhost:8080
-```
+    http://localhost:8080
 
 ### 공통 인증 헤더
 모든 API 요청에는 다음 헤더가 필요합니다:
@@ -26,11 +24,11 @@ Content-Type: application/json; charset=utf-8
 
 | 메서드 | 엔드포인트 | 설명 | 인증 필요 |
 |--------|------------|------|-----------|
-| `GET` | `/` | 서버 기본 상태 확인 | ✅ |
-| `GET` | `/health` | 상세 헬스체크 및 큐 상태 | ✅ |
-| `POST` | `/room/create` | 새로운 룸 생성 요청 | ✅ |
-| `GET` | `/room/result` | 룸 생성 결과 조회 | ✅ |
-| `GET` | `/queue/status` | 큐 처리 상태 확인 | ✅ |
+| GET | / | 서버 기본 상태 확인 | ✅ |
+| GET | /health | 상세 헬스체크 및 큐 상태 | ✅ |
+| POST | /room/create | 새로운 룸 생성 요청 | ✅ |
+| GET | /room/result | 룸 생성 결과 조회 | ✅ |
+| GET | /queue/status | 큐 처리 상태 확인 | ✅ |
 
 ---
 
@@ -40,28 +38,27 @@ Content-Type: application/json; charset=utf-8
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">기본 서버 상태 확인</h4>
-  
-  **요청 예시:**
-  ```bash
-  curl http://localhost:8080/ \
-    -H "Authorization: your_api_key"
-  ```
-  
-  **정상 응답 (200 OK):**
+
+**요청 예시:**
+
+    curl http://localhost:8080/ \
+      -H "Authorization: your_api_key"
+
+**정상 응답 (200 OK):**
   ```json
   {
     "status": "online",
     "message": "Eroom 서버가 작동 중입니다"
   }
   ```
-  
-  **에러 응답 (401 Unauthorized):**
+
+**에러 응답 (401 Unauthorized):**
   ```json
   {
     "error": "인증이 필요합니다"
   }
   ```
-  
+
   <div style="margin-top: 15px; text-align: center;">
     <a href="endpoints/health-check.md" style="color: #667eea; text-decoration: none; font-weight: bold;">
       📖 자세한 내용은 이곳을 클릭해주세요 →
@@ -73,14 +70,13 @@ Content-Type: application/json; charset=utf-8
 
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">서버 상태 및 큐 통계</h4>
-  
-  **요청 예시:**
-  ```bash
-  curl http://localhost:8080/health \
-    -H "Authorization: your_api_key"
-  ```
-  
-  **정상 응답 (200 OK):**
+
+**요청 예시:**
+
+    curl http://localhost:8080/health \
+      -H "Authorization: your_api_key"
+
+**정상 응답 (200 OK):**
   ```json
   {
     "status": "healthy",
@@ -92,7 +88,7 @@ Content-Type: application/json; charset=utf-8
     }
   }
   ```
-  
+
   <div style="margin-top: 15px; text-align: center;">
     <a href="endpoints/health-check.md" style="color: #667eea; text-decoration: none; font-weight: bold;">
       📖 자세한 내용은 이곳을 클릭해주세요 →
@@ -104,22 +100,21 @@ Content-Type: application/json; charset=utf-8
 
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">AI 기반 룸 생성 시작</h4>
-  
-  **요청 예시:**
-  ```bash
-  curl -X POST http://localhost:8080/room/create \
-    -H "Authorization: your_api_key" \
-    -H "Content-Type: application/json" \
-    -d '{
-      "uuid": "user_12345",
-      "theme": "우주정거장",
-      "keywords": ["미래", "과학", "생존"],
-      "difficulty": "normal",
-      "room_prefab": "https://example.com/prefab/space_station.fbx"
-    }'
-  ```
-  
-  **정상 응답 (202 Accepted):**
+
+**요청 예시:**
+
+    curl -X POST http://localhost:8080/room/create \
+      -H "Authorization: your_api_key" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "uuid": "user_12345",
+        "theme": "우주정거장",
+        "keywords": ["미래", "과학", "생존"],
+        "difficulty": "normal",
+        "room_prefab": "https://example.com/prefab/space_station.fbx"
+      }'
+
+**정상 응답 (202 Accepted):**
   ```json
   {
     "ruid": "room_a1b2c3d4e5f6",
@@ -127,15 +122,15 @@ Content-Type: application/json; charset=utf-8
     "message": "Room creation request has been accepted. Poll /room/result?ruid=room_a1b2c3d4e5f6 for status."
   }
   ```
-  
-  **에러 응답 (400 Bad Request):**
+
+**에러 응답 (400 Bad Request):**
   ```json
   {
     "success": false,
     "error": "Invalid request body or missing 'uuid' (userId)."
   }
   ```
-  
+
   <div style="margin-top: 15px; text-align: center;">
     <a href="endpoints/room-create.md" style="color: #667eea; text-decoration: none; font-weight: bold;">
       📖 자세한 내용은 이곳을 클릭해주세요 →
@@ -147,22 +142,21 @@ Content-Type: application/json; charset=utf-8
 
 <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">생성 결과 확인 및 다운로드</h4>
-  
-  **요청 예시:**
-  ```bash
-  curl "http://localhost:8080/room/result?ruid=room_a1b2c3d4e5f6" \
-    -H "Authorization: your_api_key"
-  ```
-  
-  **처리 중 응답 (200 OK):**
+
+**요청 예시:**
+
+    curl "http://localhost:8080/room/result?ruid=room_a1b2c3d4e5f6" \
+      -H "Authorization: your_api_key"
+
+**처리 중 응답 (200 OK):**
   ```json
   {
     "ruid": "room_a1b2c3d4e5f6",
     "status": "PROCESSING"
   }
   ```
-  
-  **완료 응답 (200 OK):**
+
+**완료 응답 (200 OK):**
   ```json
   {
     "uuid": "user_12345",
@@ -172,8 +166,8 @@ Content-Type: application/json; charset=utf-8
     "keywords": ["미래", "과학", "생존"],
     "room_prefab": "https://example.com/prefab/space_station.fbx",
     "scenario": {
-      "scenario_data": { ... },
-      "object_instructions": [ ... ]
+      "scenario_data": {},
+      "object_instructions": []
     },
     "scripts": {
       "GameManager.cs": "base64_encoded_content",
@@ -187,7 +181,7 @@ Content-Type: application/json; charset=utf-8
     "timestamp": "1234567890"
   }
   ```
-  
+
   <div style="margin-top: 15px; text-align: center;">
     <a href="endpoints/room-result.md" style="color: #667eea; text-decoration: none; font-weight: bold;">
       📖 자세한 내용은 이곳을 클릭해주세요 →
@@ -199,14 +193,13 @@ Content-Type: application/json; charset=utf-8
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">처리 대기열 모니터링</h4>
-  
-  **요청 예시:**
-  ```bash
-  curl http://localhost:8080/queue/status \
-    -H "Authorization: your_api_key"
-  ```
-  
-  **정상 응답 (200 OK):**
+
+**요청 예시:**
+
+    curl http://localhost:8080/queue/status \
+      -H "Authorization: your_api_key"
+
+**정상 응답 (200 OK):**
   ```json
   {
     "queued": 5,
@@ -215,7 +208,7 @@ Content-Type: application/json; charset=utf-8
     "maxConcurrent": 1
   }
   ```
-  
+
   <div style="margin-top: 15px; text-align: center;">
     <a href="endpoints/queue-status.md" style="color: #667eea; text-decoration: none; font-weight: bold;">
       📖 자세한 내용은 이곳을 클릭해주세요 →
@@ -229,13 +222,13 @@ Content-Type: application/json; charset=utf-8
 
 ### 전체 워크플로우
 
-```mermaid
+{% mermaid %}
 sequenceDiagram
-    participant Client
-    participant API
-    participant Queue
-    participant AI
-    
+participant Client
+participant API
+participant Queue
+participant AI
+
     Client->>API: POST /room/create
     API->>Queue: 큐에 추가
     API-->>Client: 202 { ruid }
@@ -250,7 +243,7 @@ sequenceDiagram
     
     Client->>API: GET /room/result?ruid=xxx
     API-->>Client: { status: "COMPLETED", data... }
-```
+{% endmermaid %}
 
 ---
 
@@ -273,17 +266,16 @@ sequenceDiagram
 
 <div style="background: #ffcdd2; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔑 인증 헤더 설정</h4>
-  
-  **모든 요청에 필수:**
-  ```http
-  Authorization: your_api_key_here
-  ```
-  
-  **보안 권장사항:**
-  - API 키를 코드에 하드코딩하지 마세요
-  - 환경 변수로 관리하세요
-  - 주기적으로 키를 변경하세요
-  - HTTPS 사용을 권장합니다 (프로덕션)
+
+**모든 요청에 필수:**
+
+    Authorization: your_api_key_here
+
+**보안 권장사항:**
+- API 키를 코드에 하드코딩하지 마세요
+- 환경 변수로 관리하세요
+- 주기적으로 키를 변경하세요
+- HTTPS 사용을 권장합니다 (프로덕션)
 </div>
 
 ---
@@ -316,12 +308,12 @@ sequenceDiagram
 
 ### 일반적인 에러 시나리오
 
-| 에러 | 원인 | 해결 방법 |
-|------|------|-----------|
+| 에러               | 원인          | 해결 방법        |
+|------------------|-------------|--------------|
 | 401 Unauthorized | API 키 누락/오류 | 올바른 API 키 사용 |
-| 400 Bad Request | 필수 필드 누락 | 요청 형식 확인 |
-| 404 Not Found | 잘못된 ruid | ruid 확인 |
-| 500 Server Error | 내부 서버 오류 | 로그 확인, 재시도 |
+| 400 Bad Request  | 필수 필드 누락    | 요청 형식 확인     |
+| 404 Not Found    | 잘못된 ruid    | ruid 확인      |
+| 500 Server Error | 내부 서버 오류    | 로그 확인, 재시도   |
 
 ---
 
