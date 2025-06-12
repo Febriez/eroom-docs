@@ -2,20 +2,20 @@
 
 * [🎮 ERoom](README.md)
 
-## 📋 1. 프로젝트 개요
+## 🌟 1. 프로젝트 개요
 
 * [1.1 프로젝트 소개](project-overview/project-introduction.md)
 * [1.2 전체 시스템 아키텍처](project-overview/system-architecture.md)
 * [1.3 기술 스택 요약](project-overview/tech-stack.md)
 
-## 🏗️ 2. 서버 아키텍처
+## 🎯 2. 서버 아키텍처
 
 * [2.1 시스템 구성도 (Mermaid)](https://mermaid.live/view#example-diagram-id)
-* [2.2 API 설계 명세](architecture/api-design.md) → [상세 보기](api-reference/rest-api-spec.md)
+* [2.2 API 설계 명세](architecture/api-design.md)
 * [2.3 데이터 모델링](architecture/data-modeling.md)
 * [2.4 성능 아키텍처](architecture/performance-architecture.md)
 
-## ⚙️ 3. 서버 구현
+## 🏗️ 3. 서버 구현
 
 * [3.1 Undertow 서버 개요](backend/undertow-server.md)
 * [3.2 API 핸들러 구조](backend/api-handler.md)
@@ -52,6 +52,6 @@
 * [7.2 Unity 클라이언트 이슈](troubleshooting/unity-issues.md)
 * [7.3 AI 연동 문제](troubleshooting/ai-integration-issues.md)
 
-## 📚 8. 부록
+## 🐛 8. 부록
 
 * [8.1 프롬프트 템플릿](appendix/prompt-templates.md)
