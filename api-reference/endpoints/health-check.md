@@ -3,6 +3,7 @@
 ## GET / - 기본 상태 확인
 
 ### 개요
+
 서버의 기본 동작 상태를 확인하는 가장 간단한 엔드포인트입니다.
 
 ---
@@ -10,14 +11,19 @@
 ## 요청 상세
 
 ### HTTP 메서드
-    GET /
+
+```
+GET /
+```
 
 ### 필수 헤더
+
 ```http
 Authorization: your_api_key
 ```
 
 ### 요청 본문
+
 없음
 
 ---
@@ -51,6 +57,7 @@ Authorization: your_api_key
 ## GET /health - 상세 헬스체크
 
 ### 개요
+
 서버의 상세한 상태와 큐 처리 통계를 제공합니다.
 
 ---
@@ -58,14 +65,19 @@ Authorization: your_api_key
 ## 요청 상세
 
 ### HTTP 메서드
-    GET /health
+
+```
+GET /health
+```
 
 ### 필수 헤더
+
 ```http
 Authorization: your_api_key
 ```
 
 ### 요청 본문
+
 없음
 
 ---
@@ -187,6 +199,29 @@ done
 1. **인증 필수**: Authorization 헤더 없이는 401 오류 발생
 2. **응답 속도**: 일반적으로 10-20ms 이내 응답
 3. **모니터링 주기**: 과도한 헬스체크는 서버 부하 유발 (10초 이상 권장)
+4. **환경 변수**: EROOM_PRIVATE_KEY가 설정되지 않으면 자동 생성된 키 사용
+
+---
+
+## 인증 관련 정보
+
+### API Key 설정
+
+서버는 `EROOM_PRIVATE_KEY` 환경 변수를 통해 API 키를 설정합니다:
+
+```bash
+# Linux/Mac
+export EROOM_PRIVATE_KEY="your-secure-api-key"
+
+# Windows
+set EROOM_PRIVATE_KEY=your-secure-api-key
+```
+
+환경 변수가 설정되지 않은 경우:
+
+- 서버가 자동으로 UUID 기반 랜덤 키 생성
+- 생성된 키가 로그에 출력됨
+- 서버 재시작 시 키가 변경됨
 
 ---
 

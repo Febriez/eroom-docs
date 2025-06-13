@@ -9,26 +9,31 @@
 
 ---
 
-## 🏗️ MeshyService 구조
+## 🏗️ MeshyApiService 구조
 
 ### 주요 구성 요소
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔧 서비스 아키텍처</h4>
 
-  ```java
-  public class MeshyService {
-    private final ApiKeyConfig apiKeyConfig;
+```java
+public class MeshyApiService implements MeshService {
+    private static final Logger log = LoggerFactory.getLogger(MeshyApiService.class);
+    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private static final String MESHY_API_BASE_URL = "https://api.meshy.ai/openapi/v2/text-to-3d";
+    private static final int TIMEOUT_SECONDS = 30;
+    private static final int MAX_POLLING_ATTEMPTS = 100;
+    private static final int POLLING_INTERVAL_MS = 3000;
+
+    private final ApiKeyProvider apiKeyProvider;
     private final OkHttpClient httpClient;
 
-    // API 엔드포인트
-    private static final String MESHY_API_URL = "https://api.meshy.ai/v2/text-to-3d";
-    private static final String MESHY_API_STATUS_URL = "https://api.meshy.ai/v2/resources/";
-
-    // 주요 메서드
-    public String generateModel(String prompt, String objectName, int keyIndex)
+    public MeshyApiService(ApiKeyProvider apiKeyProvider) {
+        this.apiKeyProvider = apiKeyProvider;
+        this.httpClient = createHttpClient();
+    }
 }
-  ```
+```
 
 **특징:**
 
@@ -36,6 +41,7 @@
 - ✅ 다중 API 키 로드밸런싱
 - ✅ 비동기 상태 추적
 - ✅ FBX 포맷 출력
+- ✅ 폴링 기반 진행 상황 확인
 
 </div>
 
@@ -49,21 +55,22 @@
 flowchart TB
 A[텍스트 설명] --> B[Preview 생성]
 B --> C{상태 확인}
-C -->|진행중| D[3초 대기]
+C -->|PENDING/IN_PROGRESS| D[3초 대기]
 D --> C
-C -->|완료| E[Refine 요청]
+C -->|SUCCEEDED| E[Refine 요청]
 E --> F{상태 확인}
-F -->|진행중| G[3초 대기]
+F -->|PENDING/IN_PROGRESS| G[3초 대기]
 G --> F
-F -->|완료| H[Tracking ID 반환]
+F -->|SUCCEEDED| H[FBX URL 추출]
+H --> I[URL 반환]
 
-    C -->|실패| I[에러 ID 반환]
-    F -->|실패| I
+    C -->|FAILED| J[에러 ID 반환]
+    F -->|FAILED| J
     
     style B fill:#4a90e2
     style E fill:#4a90e2
-    style H fill:#4caf50
-    style I fill:#e74c3c
+    style I fill:#4caf50
+    style J fill:#e74c3c
 
 {% endmermaid %}
 
@@ -76,18 +83,33 @@ F -->|완료| H[Tracking ID 반환]
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🖼️ 빠른 프리뷰 모델</h4>
 
-  ```java
-  private String createPreview(String prompt, String apiKey) {
-    JsonObject requestBody = new JsonObject();
-    requestBody.addProperty("prompt", prompt);
-    requestBody.addProperty("negative_prompt", "low quality, fast create");
-    requestBody.addProperty("mode", "preview");
+```java
 
-    // API 호출
-    JsonObject response = callMeshyApi(requestBody, apiKey);
-    return response.get("resource_id").getAsString();
+@Nullable
+private String createPreview(String prompt, String apiKey) {
+    try {
+        JsonObject requestBody = createPreviewRequestBody(prompt);
+        JsonObject responseJson = callMeshyApi(requestBody, apiKey);
+        return extractResourceId(responseJson);
+    } catch (Exception e) {
+        log.error("프리뷰 생성 중 오류 발생: {}", e.getMessage());
+        return null;
+    }
 }
-  ```
+
+@NotNull
+private JsonObject createPreviewRequestBody(String prompt) {
+    JsonObject requestBody = new JsonObject();
+    requestBody.addProperty("mode", "preview");
+    requestBody.addProperty("prompt", prompt);
+    requestBody.addProperty("art_style", "realistic");
+    requestBody.addProperty("ai_model", "meshy-4");
+    requestBody.addProperty("topology", "triangle");
+    requestBody.addProperty("target_polycount", 30000);
+    requestBody.addProperty("should_remesh", true);
+    return requestBody;
+}
+```
 
 **특징:**
 
@@ -103,32 +125,52 @@ F -->|완료| H[Tracking ID 반환]
 <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔄 진행 상황 모니터링</h4>
 
-  ```java
-  private boolean waitForCompletion(String resourceId, String apiKey) {
-    for (int i = 0; i < 200; i++) {  // 최대 10분 (3초 * 200)
-        JsonObject status = getResourceStatus(resourceId, apiKey);
+```java
+private boolean isTaskFailed(String taskId, String apiKey) {
+    try {
+        for (int i = 0; i < MAX_POLLING_ATTEMPTS; i++) {
+            JsonObject taskStatus = getTaskStatus(taskId, apiKey);
+            if (taskStatus == null) {
+                log.error("작업 상태 조회 실패");
+                return true;
+            }
 
-        String statusStr = status.get("status").getAsString();
-        int progress = status.get("progress").getAsInt();
+            String status = taskStatus.get("status").getAsString();
+            int progress = taskStatus.get("progress").getAsInt();
 
-        log.info("리소스 {} 상태: {}, 진행률: {}%",
-                resourceId, statusStr, progress);
+            log.info("작업 상태: {}, 진행률: {}%", status, progress);
 
-        if ("completed".equals(statusStr)) return true;
-        if ("failed".equals(statusStr)) return false;
+            if ("SUCCEEDED".equals(status)) {
+                return false;
+            } else if ("FAILED".equals(status) || "CANCELED".equals(status)) {
+                if (taskStatus.has("task_error") &&
+                        taskStatus.getAsJsonObject("task_error").has("message")) {
+                    String errorMessage = taskStatus.getAsJsonObject("task_error")
+                            .get("message").getAsString();
+                    log.error("작업 실패: {}", errorMessage);
+                }
+                return true;
+            }
 
-        Thread.sleep(3000);  // 3초 대기
+            Thread.sleep(POLLING_INTERVAL_MS);
+        }
+
+        log.error("작업 생성 시간 초과");
+        return true;
+    } catch (Exception e) {
+        log.error("상태 확인 중 오류 발생: {}", e.getMessage());
+        return true;
     }
-    return false;  // 타임아웃
 }
-  ```
+```
 
 **상태 값:**
 
-- pending: 대기 중
-- processing: 처리 중
-- completed: 성공
-- failed: 실패
+- PENDING: 대기 중
+- IN_PROGRESS: 처리 중
+- SUCCEEDED: 성공
+- FAILED: 실패
+- CANCELED: 취소됨
 
 </div>
 
@@ -137,17 +179,29 @@ F -->|완료| H[Tracking ID 반환]
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">💎 고품질 최종 모델</h4>
 
-  ```java
-  private String refineModel(String previewId, String apiKey) {
-    JsonObject requestBody = new JsonObject();
-    requestBody.addProperty("resource_id", previewId);
-    requestBody.addProperty("format", "fbx");  // Unity 호환
-    requestBody.addProperty("mode", "refine");
+```java
 
-    JsonObject response = callMeshyApi(requestBody, apiKey);
-    return response.get("resource_id").getAsString();
+@Nullable
+private String refineModel(String previewId, String apiKey) {
+    try {
+        JsonObject requestBody = createRefineRequestBody(previewId);
+        JsonObject responseJson = callMeshyApi(requestBody, apiKey);
+        return extractResourceId(responseJson);
+    } catch (Exception e) {
+        log.error("모델 정제 중 오류 발생: {}", e.getMessage());
+        return null;
+    }
 }
-  ```
+
+@NotNull
+private JsonObject createRefineRequestBody(String previewId) {
+    JsonObject requestBody = new JsonObject();
+    requestBody.addProperty("mode", "refine");
+    requestBody.addProperty("preview_task_id", previewId);
+    requestBody.addProperty("enable_pbr", true);
+    return requestBody;
+}
+```
 
 **특징:**
 
@@ -167,16 +221,20 @@ F -->|완료| H[Tracking ID 반환]
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">⚖️ API 키 분산</h4>
 
-  ```java
-  public String getMeshyKey(int index) {
-    return switch (index % 3) {
-        case 0 -> MESHY_KEY_1;
-        case 1 -> MESHY_KEY_2;
-        case 2 -> MESHY_KEY_3;
-        default -> throw new NoAvailableKeyException();
-    };
+```java
+// EnvironmentApiKeyProvider에서
+@Override
+public String getMeshyKey(int index) {
+    int keyIndex = index % MESHY_KEYS.length;
+    String key = MESHY_KEYS[keyIndex];
+
+    if (key == null) {
+        throw new NoAvailableKeyException("사용 가능한 MESHY_KEY가 없습니다. Index: " + keyIndex);
+    }
+
+    return key;
 }
-  ```
+```
 
 **장점:**
 
@@ -187,10 +245,13 @@ F -->|완료| H[Tracking ID 반환]
 
 **사용 예:**
 
-  ```java
-  // 오브젝트 인덱스 기반 키 선택
-String apiKey = apiKeyConfig.getMeshyKey(objectIndex);
-  ```
+```java
+// 오브젝트 인덱스 기반 키 선택
+String apiKey = apiKeyProvider.getMeshyKey(keyIndex);
+log.
+
+info("{}의 모델 생성 시작, 키 인덱스: {}",objectName, keyIndex);
+```
 
 </div>
 
@@ -204,7 +265,7 @@ String apiKey = apiKeyConfig.getMeshyKey(objectIndex);
   <h4 style="margin: 0 0 15px 0;">⏱️ 단계별 소요 시간</h4>
 
 | 단계             | 최소 | 평균  | 최대  |
-  |----------------|----|-----|-----|
+|----------------|----|-----|-----|
 | **Preview 생성** | 1분 | 2분  | 3분  |
 | **Preview 폴링** | -  | 30초 | 1분  |
 | **Refine 생성**  | 3분 | 4분  | 5분  |
@@ -225,23 +286,46 @@ String apiKey = apiKeyConfig.getMeshyKey(objectIndex);
 <div style="background: #ffcdd2; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">⚠️ 에러 ID 체계</h4>
 
-  ```java
-  // 에러 타입별 ID 생성
-  return switch(errorType){
-        case PREVIEW_FAIL ->"error-preview-"+UUID.
+```java
 
-randomUUID();
-      case TIMEOUT ->"timeout-preview-"+previewId;
-      case REFINE_FAIL ->"error-refine-"+previewId;
-      case EXCEPTION ->"error-exception-"+UUID.
+@Override
+public String generateModel(String prompt, String objectName, int keyIndex) {
+    try {
+        String apiKey = apiKeyProvider.getMeshyKey(keyIndex);
+        log.info("{}의 모델 생성 시작, 키 인덱스: {}", objectName, keyIndex);
+        return processModelGeneration(prompt, objectName, apiKey);
+    } catch (Exception e) {
+        log.error("{}의 모델 생성 중 오류 발생: {}", objectName, e.getMessage());
+        return "error-general-" + UUID.randomUUID().toString();
+    }
+}
 
-randomUUID();
+@NotNull
+private String processModelGeneration(String prompt, String objectName, String apiKey) {
+    try {
+        String previewId = createPreview(prompt, apiKey);
+        if (previewId == null) {
+            log.error("{}의 프리뷰 생성 실패", objectName);
+            return "error-preview-" + UUID.randomUUID();
+        }
 
-default ->"error-general-"+UUID.
+        log.info("{}의 프리뷰가 ID: {}로 생성됨", objectName, previewId);
+        return processPreview(previewId, objectName, apiKey);
+    } catch (Exception e) {
+        log.error("{}의 프리뷰 생성 단계에서 오류 발생: {}", objectName, e.getMessage());
+        return "error-preview-exception-" + UUID.randomUUID().toString();
+    }
+}
+```
 
-randomUUID();
-  };
-  ```
+**에러 ID 패턴:**
+
+| 패턴                     | 의미        | 예시                      |
+|------------------------|-----------|-------------------------|
+| `error-preview-{UUID}` | 프리뷰 생성 실패 | error-preview-abc123    |
+| `timeout-preview-{ID}` | 프리뷰 타임아웃  | timeout-preview-xyz789  |
+| `error-refine-{ID}`    | 정제 실패     | error-refine-preview123 |
+| `error-general-{UUID}` | 일반 오류     | error-general-def456    |
 
 **에러 복구:**
 
@@ -258,11 +342,16 @@ randomUUID();
 ### HTTP 클라이언트 설정
 
 ```java
-private final OkHttpClient httpClient = new OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .build();
+
+@NotNull
+@Contract(" -> new")
+private OkHttpClient createHttpClient() {
+    return new OkHttpClient.Builder()
+            .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .build();
+}
 ```
 
 ### API 호출 통계
@@ -283,30 +372,30 @@ private final OkHttpClient httpClient = new OkHttpClient.Builder()
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">📍 추적 ID 활용</h4>
 
-**성공 시:**
+**성공 시 (FBX URL):**
 
-  ```json
-  {
-  "SpaceHelmet": "res_abc123def456",
-  "ControlPanel": "res_ghi789jkl012"
+```json
+{
+  "SpaceHelmet": "https://assets.meshy.ai/abc123/model.fbx",
+  "ControlPanel": "https://assets.meshy.ai/def456/model.fbx"
 }
-  ```
+```
 
 **실패 포함:**
 
-  ```json
-  {
-  "SpaceHelmet": "res_abc123def456",
+```json
+{
+  "SpaceHelmet": "https://assets.meshy.ai/abc123/model.fbx",
   "BrokenDoor": "timeout-preview-xyz789",
   "failed_models": {
     "BrokenDoor": "timeout-preview-xyz789"
   }
 }
-  ```
+```
 
 **클라이언트 활용:**
 
-- 추적 ID로 모델 다운로드
+- FBX URL로 직접 모델 다운로드
 - 실패한 모델 대체 처리
 - 진행 상황 표시
 
@@ -336,6 +425,55 @@ private final OkHttpClient httpClient = new OkHttpClient.Builder()
     </ul>
   </div>
 </div>
+
+---
+
+## 💻 실제 사용 예시
+
+### 전체 처리 흐름
+
+```java
+
+@NotNull
+private String refineModelAfterPreview(String previewId, String objectName, String apiKey) {
+    try {
+        String refineId = refineModel(previewId, apiKey);
+        if (refineId == null) {
+            log.error("{}의 모델 정제 실패", objectName);
+            return "error-refine-" + previewId;
+        }
+
+        log.info("{}의 정제 작업이 ID: {}로 시작됨. 완료 대기 중...", objectName, refineId);
+
+        // Refine 작업 완료 대기
+        if (isTaskFailed(refineId, apiKey)) {
+            log.error("{}의 정제 작업 완료 시간 초과", objectName);
+            return "timeout-refine-" + refineId;
+        }
+
+        // 완료된 작업의 상세 정보 조회
+        JsonObject taskDetails = getCompletedTaskDetails(refineId, apiKey);
+        if (taskDetails == null) {
+            log.error("{}의 완료된 작업 정보 조회 실패", objectName);
+            return "error-fetch-details-" + refineId;
+        }
+
+        // FBX URL 추출
+        String fbxUrl = extractFbxUrl(taskDetails);
+        if (fbxUrl == null) {
+            log.error("{}의 FBX URL 추출 실패", objectName);
+            return "error-no-fbx-" + refineId;
+        }
+
+        log.info("{}의 모델 생성 완료. FBX URL: {}", objectName, fbxUrl);
+        return fbxUrl;
+
+    } catch (Exception e) {
+        log.error("{}의 모델 정제 단계에서 오류 발생: {}", objectName, e.getMessage());
+        return "error-refine-exception-" + previewId;
+    }
+}
+```
 
 ---
 

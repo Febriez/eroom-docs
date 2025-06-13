@@ -27,11 +27,19 @@
   <h4 style="margin: 0 0 10px 0;">API Key 인증</h4>
   <p>모든 API 요청에는 Authorization 헤더가 필요합니다.</p>
 
-  ```http
-  Authorization: your-api-key-here
-  Content-Type: application/json; charset=utf-8
-  ```
+```http
+Authorization: your-api-key-here
+Content-Type: application/json; charset=utf-8
+```
 
+**API Key 설정 방법:**
+
+```bash
+# 환경 변수로 설정
+export EROOM_PRIVATE_KEY="your-secure-api-key"
+```
+
+환경 변수가 없으면 서버가 자동으로 UUID 키를 생성합니다.
 </div>
 
 ---
@@ -106,8 +114,9 @@ participant AI Services
 ```json
 {
   "ruid": "room_a1b2c3d4e5f6",
-  "status": "Queued",
-  "message": "Poll /room/result?ruid=..."
+  "status": "대기중",
+  "message": "방 생성 요청이 수락되었습니다. 상태 확인을 위해 /room/result?ruid=room_a1b2c3d4e5f6를 폴링하세요.",
+  "success": true
 }
 ```
 
@@ -132,12 +141,15 @@ participant AI Services
   "scenario": {
     "scenario_data": {
       "theme": "우주정거장",
-      "description": "버려진 우주정거장 탈출 시나리오"
+      "description": "버려진 우주정거장 탈출 시나리오",
+      "escape_condition": "메인 에어락 열기",
+      "puzzle_flow": "전력 복구 → 산소 시스템 → 통신 수리 → 탈출"
     },
     "object_instructions": [
       {
         "name": "GameManager",
-        "type": "game_manager"
+        "type": "game_manager",
+        "functional_description": "전체 게임 상태 관리"
       }
     ]
   },
@@ -146,8 +158,8 @@ participant AI Services
     "DoorLock.cs": "base64_encoded_content"
   },
   "model_tracking": {
-    "SpaceHelmet": "mesh_tracking_id_1",
-    "ControlPanel": "mesh_tracking_id_2"
+    "SpaceHelmet": "https://meshy.ai/.../model.fbx",
+    "ControlPanel": "res_tracking_id_2"
   },
   "success": true,
   "timestamp": "1234567890"
@@ -249,6 +261,69 @@ async function pollResult(ruid) {
         await sleep(interval);
         interval = Math.min(interval * pollInterval.multiplier, pollInterval.max);
     }
+}
+```
+
+---
+
+## 🔒 보안 고려사항
+
+### API Key 관리
+
+<div style="background: #ffcdd2; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <h4 style="margin: 0 0 15px 0;">🔐 보안 체크리스트</h4>
+
+- [ ] API 키를 코드에 하드코딩하지 않기
+- [ ] 환경 변수로 관리
+- [ ] HTTPS 사용 (프로덕션)
+- [ ] 주기적 키 로테이션
+- [ ] 접근 로그 모니터링
+
+</div>
+
+### 입력 검증
+
+모든 요청은 서버에서 철저히 검증됩니다:
+
+```java
+// RoomRequestValidator에서 검증
+-UUID:
+비어있지 않음
+-Theme:
+비어있지 않음
+-Keywords:최소 1개,
+빈 키워드
+없음
+-Difficulty:easy/normal/
+hard 중
+하나
+-
+Room Prefab:https:// 로 시작하는 유효한 URL
+```
+
+---
+
+## 📊 응답 포맷 일관성
+
+### 성공 응답 구조
+
+```json
+{
+  "success": true,
+  "data": {
+    ...
+  },
+  "timestamp": "1234567890"
+}
+```
+
+### 에러 응답 구조
+
+```json
+{
+  "success": false,
+  "error": "구체적인 에러 메시지",
+  "timestamp": "1234567890"
 }
 ```
 

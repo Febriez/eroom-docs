@@ -16,14 +16,25 @@
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔧 서비스 아키텍처</h4>
 
-  ```java
-  public class AnthropicAiService implements AiService {
-    // 마크다운 스크립트 파싱을 위한 패턴 (업데이트됨)
+```java
+public class AnthropicAiService implements AiService {
+    private static final Logger log = LoggerFactory.getLogger(AnthropicAiService.class);
+
+    // 개선된 정규식: 코드 블록의 언어 식별자를 더 정확하게 캡처
     private static final Pattern MARKDOWN_SCRIPT_PATTERN = Pattern.compile(
-            "```(\\w+)\\s*\\n([\\s\\S]*?)```",
+            "```(?:csharp|cs|c#)?\\s*\\n([\\s\\S]*?)```",
             Pattern.MULTILINE | Pattern.CASE_INSENSITIVE
     );
 
+    // 스크립트 이름을 찾기 위한 추가 패턴
+    private static final Pattern SCRIPT_NAME_PATTERN = Pattern.compile(
+            "```(\\w+(?:\\.cs)?)\\s*\\n([\\s\\S]*?)```",
+            Pattern.MULTILINE
+    );
+
+    private static final String GAME_MANAGER_NAME = "GameManager";
+
+    // C# 클래스 이름 추출을 위한 패턴
     private static final Pattern CLASS_NAME_PATTERN = Pattern.compile(
             "public\\s+(?:partial\\s+)?class\\s+(\\w+)\\s*[:{]",
             Pattern.MULTILINE
@@ -32,13 +43,8 @@
     private final ApiKeyProvider apiKeyProvider;
     private final ConfigurationManager configManager;
     private volatile AnthropicClient client;
-
-    // 주요 메서드
-    public JsonObject generateScenario(String prompt, JsonObject requestData)
-
-    public Map<String, String> generateUnifiedScripts(String prompt, JsonObject requestData)
 }
-  ```
+```
 
 **특징:**
 
@@ -93,32 +99,22 @@ D --> E[검증 및 반환]
 ```java
 private JsonObject parseJsonResponse(String textContent) {
     try {
-        // 압축된 응답에서 JSON 추출
-        String jsonContent = extractJsonFromResponse(textContent);
+        // 마크다운 코드 블록에서 JSON 추출 시도
+        String jsonContent = extractJsonFromMarkdown(textContent);
+        if (jsonContent == null) {
+            // 마크다운 블록이 없으면 전체 텍스트를 JSON으로 파싱
+            jsonContent = textContent;
+        }
 
         JsonObject result = JsonParser.parseString(jsonContent).getAsJsonObject();
-        log.info("시나리오 생성 완료 - 오브젝트 수: {}",
-                result.getAsJsonArray("object_instructions").size());
+        log.info("통합 시나리오 생성 완료");
         return result;
     } catch (JsonSyntaxException e) {
-        log.error("시나리오 JSON 파싱 실패: {}", e.getMessage());
+        log.error("시나리오 JSON 파싱 실패: {}. 응답: {}",
+                e.getMessage(), truncateForLog(textContent));
         terminateWithError("JSON 파싱 실패");
         return null;
     }
-}
-
-private String extractJsonFromResponse(String textContent) {
-    // 마크다운 코드 블록 안의 JSON 추출
-    Pattern jsonPattern = Pattern.compile("```(?:json)?\\s*\\n([\\s\\S]*?)```",
-            Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-    Matcher matcher = jsonPattern.matcher(textContent);
-
-    if (matcher.find()) {
-        return matcher.group(1).trim();
-    }
-
-    // 코드 블록이 없으면 전체 텍스트를 JSON으로 간주
-    return textContent.trim();
 }
 ```
 
@@ -156,31 +152,10 @@ private String extractJsonFromResponse(String textContent) {
 ```java
 public Map<String, String> generateUnifiedScripts(String prompt, JsonObject requestData) {
     try {
-        log.info("통합 스크립트 생성 시작");
+        log.info("마크다운 기반 통합 스크립트 생성 시작");
 
-        // Claude API 호출
-        MessageCreateParams params = MessageCreateParams.builder()
-                .model(MODEL_NAME)
-                .maxTokens(MAX_TOKENS)
-                .temperature(configManager.getScriptTemperature())
-                .addMessage(Message.builder()
-                        .role(Role.USER)
-                        .content(prompt)
-                        .build())
-                .build();
-
-        MessageResponse response = getClient().messages().create(params);
-        String textContent = extractTextContent(response);
-
-        validateModelResponse(textContent, "스크립트 생성");
-
-        // 마크다운에서 스크립트 추출 및 Base64 인코딩
-        Map<String, String> encodedScripts = extractScriptsFromMarkdown(textContent);
-
-        validateGameManagerExists(encodedScripts);
-
-        log.info("통합 스크립트 생성 완료: {}개 스크립트", encodedScripts.size());
-        return encodedScripts;
+        String response = executeAnthropicCall(unifiedScriptsPrompt, requestData, "scriptTemperature");
+        return parseAndEncodeScripts(response);
 
     } catch (RuntimeException e) {
         log.error("통합 스크립트 생성 중 비즈니스 오류 발생", e);
@@ -207,104 +182,78 @@ public Map<String, String> generateUnifiedScripts(String prompt, JsonObject requ
 
 AI가 다음과 같은 형태로 스크립트를 생성합니다:
 
-**GameManager 스크립트:**
+```markdown
+\`\`\`GameManager
+using UnityEngine; using UnityEngine.InputSystem;
+public class GameManager : MonoBehaviour {
+// 게임 매니저 코드
+}
+\`\`\`
 
-    using UnityEngine; using UnityEngine.InputSystem; 
-    public class GameManager : MonoBehaviour { 
-        // 게임 매니저 코드
-    }
-
-**PowerGenerator 스크립트:**
-
-    using UnityEngine; using UnityEngine.InputSystem;
-    public class PowerGenerator : MonoBehaviour { 
-        // 파워 제너레이터 코드
-    }
+\`\`\`PowerGenerator
+using UnityEngine; using UnityEngine.InputSystem;
+public class PowerGenerator : MonoBehaviour {
+// 파워 제너레이터 코드
+}
+\`\`\`
+```
 
 **파싱 전략:**
 
 1. **스크립트명 직접 추출** - 마크다운 언어 식별자에서 스크립트명 추출
-2. **필수 using 문 검증** - UnityEngine, UnityEngine.InputSystem 필수
-3. **미니파이드 코드 처리** - 한 줄로 압축된 코드 파싱
+2. **클래스명 폴백** - 스크립트명이 없으면 코드에서 클래스명 추출
+3. **필수 using 문 검증** - UnityEngine, UnityEngine.InputSystem 필수
+4. **미니파이드 코드 처리** - 한 줄로 압축된 코드 파싱
 
 </div>
 
 ### 파싱 구현 상세
 
 ```java
+
+@NotNull
 private Map<String, String> extractScriptsFromMarkdown(String content) {
     Map<String, String> encodedScripts = new HashMap<>();
 
-    // 마크다운 블록에서 스크립트 추출
-    Matcher matcher = MARKDOWN_SCRIPT_PATTERN.matcher(content);
-    while (matcher.find()) {
-        String scriptName = normalizeScriptName(matcher.group(1).trim());
-        String scriptCode = matcher.group(2).trim();
+    // 먼저 스크립트 이름이 명시된 코드 블록을 찾음
+    Matcher namedMatcher = SCRIPT_NAME_PATTERN.matcher(content);
+    while (namedMatcher.find()) {
+        String scriptName = normalizeScriptName(namedMatcher.group(1).trim());
+        String scriptCode = namedMatcher.group(2).trim();
 
-        // 빈 코드 블록 건너뛰기
-        if (scriptCode.isEmpty()) {
-            log.warn("빈 스크립트 블록 발견, 건너뜁니다: {}", scriptName);
-            continue;
+        if (shouldSkipScript(scriptName)) {
+            // C# 언어 표시자인 경우, 코드에서 클래스 이름을 추출 시도
+            scriptName = extractClassNameFromCode(scriptCode);
+            if (scriptName == null) {
+                log.warn("클래스 이름을 추출할 수 없는 C# 코드 블록을 건너뜁니다.");
+                continue;
+            }
         }
 
-        // Unity6 필수 using 문 검증
-        validateRequiredUsings(scriptCode, scriptName);
-
-        // 중복 이름 처리
         String uniqueName = ensureUniqueName(scriptName, encodedScripts);
-
-        // Base64 인코딩 및 저장
         encodeAndStore(uniqueName, scriptCode, encodedScripts);
     }
 
+    // 이름이 없는 C# 코드 블록도 처리
     if (encodedScripts.isEmpty()) {
-        log.warn("마크다운에서 스크립트를 추출하지 못했습니다");
+        log.debug("이름이 명시된 코드 블록을 찾지 못했습니다. 일반 C# 코드 블록을 검색합니다.");
+        Matcher genericMatcher = MARKDOWN_SCRIPT_PATTERN.matcher(content);
+
+        while (genericMatcher.find()) {
+            String scriptCode = genericMatcher.group(1).trim();
+            String scriptName = extractClassNameFromCode(scriptCode);
+
+            if (scriptName != null) {
+                String uniqueName = ensureUniqueName(scriptName, encodedScripts);
+                encodeAndStore(uniqueName, scriptCode, encodedScripts);
+            } else {
+                log.warn("클래스 이름을 추출할 수 없는 코드 블록을 발견했습니다.");
+            }
+        }
     }
 
+    log.debug("총 {} 개의 스크립트를 추출했습니다.", encodedScripts.size());
     return encodedScripts;
-}
-
-private void validateRequiredUsings(String code, String scriptName) {
-    if (!code.contains("using UnityEngine;")) {
-        log.warn("스크립트 {} - UnityEngine using 문 누락", scriptName);
-    }
-    if (!code.contains("using UnityEngine.InputSystem;")) {
-        log.warn("스크립트 {} - InputSystem using 문 누락", scriptName);
-    }
-}
-
-private String normalizeScriptName(String name) {
-    if (!name.endsWith(".cs")) {
-        name = name + ".cs";
-    }
-    return name;
-}
-
-private String ensureUniqueName(String scriptName, Map<String, String> existingScripts) {
-    String uniqueName = scriptName;
-    int counter = 1;
-
-    while (existingScripts.containsKey(uniqueName)) {
-        String baseName = scriptName.replace(".cs", "");
-        uniqueName = baseName + "_" + counter + ".cs";
-        counter++;
-        log.warn("중복된 스크립트 이름 발견, 변경: {} -> {}", scriptName, uniqueName);
-    }
-
-    return uniqueName;
-}
-
-private void encodeAndStore(String scriptName, String scriptCode, Map<String, String> encodedScripts) {
-    try {
-        String encoded = Base64.getEncoder().encodeToString(scriptCode.getBytes(StandardCharsets.UTF_8));
-        encodedScripts.put(scriptName, encoded);
-
-        log.debug("스크립트 파싱 완료: {} (원본: {}자, 인코딩: {}자)",
-                scriptName, scriptCode.length(), encoded.length());
-    } catch (Exception e) {
-        log.error("스크립트 Base64 인코딩 실패: {}", scriptName, e);
-        terminateWithError("Base64 인코딩 실패");
-    }
 }
 ```
 
@@ -317,33 +266,29 @@ private void encodeAndStore(String scriptName, String scriptCode, Map<String, St
 <div style="background: #ffcdd2; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">⚠️ 빠른 실패 전략</h4>
 
-  ```java
-  private void terminateWithError(String message) {
-    log.error("{} - 서버 즉시 종료", message);
+```java
+private void terminateWithError(String message) {
+    log.error("{} 서버를 종료합니다.", message);
     System.exit(1);
 }
 
 private void terminateWithError(String message, Exception e) {
-    log.error("{} - 서버 즉시 종료", message, e);
+    log.error("{} 서버를 종료합니다.", message, e);
     System.exit(1);
 }
 
-private void validateModelResponse(String response, String stage) {
-    if (response == null || response.trim().isEmpty()) {
-        terminateWithError(stage + " 응답이 비어있습니다");
-    }
-
-    if (response.length() < 100) {
-        terminateWithError(stage + " 응답이 너무 짧습니다");
+private void validateResponse(String textContent, String contentType) {
+    if (textContent == null || textContent.isEmpty()) {
+        terminateWithError(contentType + " 생성 응답이 비어있습니다.");
     }
 }
 
 private void validateApiKey(String apiKey) {
     if (apiKey == null || apiKey.trim().isEmpty()) {
-        terminateWithError("Anthropic API 키가 설정되지 않았습니다");
+        terminateWithError("Anthropic API 키가 설정되지 않았습니다.");
     }
 }
-  ```
+```
 
 **종료 조건:**
 
@@ -355,6 +300,27 @@ private void validateApiKey(String apiKey) {
 
 </div>
 
+### 검증 및 복구
+
+```java
+private void validateRequiredUsings(String code, String scriptName) {
+    if (!code.contains("using UnityEngine;")) {
+        log.warn("스크립트 {} - UnityEngine using 문 누락", scriptName);
+    }
+    if (!code.contains("using UnityEngine.InputSystem;")) {
+        log.warn("스크립트 {} - InputSystem using 문 누락", scriptName);
+    }
+}
+
+private void validateGameManagerExists(@NotNull Map<String, String> scripts) {
+    if (!scripts.containsKey(GAME_MANAGER_NAME)) {
+        log.warn("GameManager 스크립트가 파싱되지 않았습니다");
+    } else {
+        log.debug("GameManager 스크립트 확인됨");
+    }
+}
+```
+
 ---
 
 ## 📊 성능 최적화
@@ -365,7 +331,7 @@ private void validateApiKey(String apiKey) {
   <h4 style="margin: 0 0 15px 0;">💡 토큰 효율성</h4>
 
 | 지표            | 기존      | 최적화 후   | 개선율  |
-  |---------------|---------|---------|------|
+|---------------|---------|---------|------|
 | **시나리오 프롬프트** | 1,500자  | 800자    | -47% |
 | **스크립트 프롬프트** | 2,000자  | 1,200자  | -40% |
 | **입력 토큰**     | ~2,000개 | ~1,100개 | -45% |
@@ -398,6 +364,108 @@ private void validateApiKey(String apiKey) {
     </ul>
   </div>
 </div>
+
+---
+
+## 🔍 헬퍼 메서드 상세
+
+### 클라이언트 관리
+
+```java
+private synchronized AnthropicClient getClient() {
+    if (client == null) {
+        initializeClient();
+    }
+    return client;
+}
+
+private void initializeClient() {
+    String apiKey = apiKeyProvider.getAnthropicKey();
+    validateApiKey(apiKey);
+
+    client = AnthropicOkHttpClient.builder()
+            .apiKey(apiKey)
+            .build();
+
+    log.info("AnthropicClient 초기화 완료");
+}
+```
+
+### 실행 및 파싱
+
+```java
+private String executeAnthropicCall(String systemPrompt, JsonObject requestData,
+                                    String temperatureKey) {
+    try {
+        MessageCreateParams params = createMessageParams(systemPrompt, requestData, temperatureKey);
+        Message response = getClient().messages().create(params);
+
+        String textContent = extractResponseText(response);
+        validateResponse(textContent, temperatureKey.replace("Temperature", ""));
+
+        return textContent;
+    } catch (Exception e) {
+        terminateWithError(String.format("%s 생성 중 오류 발생: %s",
+                temperatureKey.replace("Temperature", ""), e.getMessage()), e);
+        return ""; // Never reached
+    }
+}
+
+@Nullable
+private String extractJsonFromMarkdown(String content) {
+    // JSON 마크다운 코드 블록 패턴
+    Pattern jsonPattern = Pattern.compile(
+            "```(?:json)?\\s*\\n([\\s\\S]*?)```",
+            Pattern.MULTILINE | Pattern.CASE_INSENSITIVE
+    );
+
+    Matcher matcher = jsonPattern.matcher(content);
+    if (matcher.find()) {
+        String extracted = matcher.group(1).trim();
+        log.debug("마크다운 코드 블록에서 JSON 추출됨: {}자", extracted.length());
+        return extracted;
+    }
+
+    return null;
+}
+```
+
+### 스크립트 처리
+
+```java
+
+@NotNull
+private String normalizeScriptName(@NotNull String scriptName) {
+    // .cs 확장자 제거
+    if (scriptName.endsWith(".cs")) {
+        return scriptName.substring(0, scriptName.length() - 3);
+    }
+    return scriptName;
+}
+
+private boolean shouldSkipScript(@NotNull String scriptName) {
+    // C# 언어 표시자들
+    return scriptName.equalsIgnoreCase("csharp") ||
+            scriptName.equalsIgnoreCase("cs") ||
+            scriptName.equalsIgnoreCase("c#");
+}
+
+private Optional<String> encodeToBase64(String content) {
+    if (content == null || content.isEmpty()) {
+        log.warn("Base64 인코딩: 입력 내용이 비어있습니다");
+        return Optional.empty();
+    }
+
+    try {
+        String encoded = Base64.getEncoder().encodeToString(
+                content.getBytes(StandardCharsets.UTF_8));
+        return Optional.of(encoded);
+    } catch (Exception e) {
+        terminateWithError("Base64 인코딩 실패: " + e.getMessage(), e);
+        return Optional.empty();
+    }
+}
+```
 
 ---
 

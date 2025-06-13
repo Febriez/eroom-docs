@@ -43,19 +43,19 @@ curl $EROOM_BASE_URL/health \
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">📝 JSON 요청 본문</h4>
-  
-  **request.json:**
+
+**request.json:**
   ```json
   {
-    "uuid": "user_12345",
-    "theme": "미래 우주정거장",
-    "keywords": ["SF", "퍼즐", "생존", "우주"],
-    "difficulty": "normal",
-    "room_prefab": "https://example.com/prefabs/space_station.fbx"
-  }
+  "uuid": "user_12345",
+  "theme": "미래 우주정거장",
+  "keywords": ["SF", "퍼즐", "생존", "우주"],
+  "difficulty": "normal",
+  "room_prefab": "https://example.com/prefabs/space_station.fbx"
+}
   ```
-  
-  **cURL 명령:**
+
+**cURL 명령:**
   ```bash
   # 룸 생성 요청
   RESPONSE=$(curl -s -X POST $EROOM_BASE_URL/room/create \
@@ -73,8 +73,8 @@ curl $EROOM_BASE_URL/health \
 
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔄 자동 폴링</h4>
-  
-  **poll-room.sh:**
+
+**poll-room.sh:**
   ```bash
   #!/bin/bash
   
@@ -165,16 +165,16 @@ curl $EROOM_BASE_URL/health \
 
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔐 헤더 구조</h4>
-  
-  **모든 요청에 필요한 헤더:**
+
+**모든 요청에 필요한 헤더:**
   ```json
   {
-    "Authorization": "your_api_key_here",
-    "Content-Type": "application/json; charset=utf-8"
-  }
+  "Authorization": "your_api_key_here",
+  "Content-Type": "application/json; charset=utf-8"
+}
   ```
-  
-  **cURL에서 헤더 설정:**
+
+**cURL에서 헤더 설정:**
   ```bash
   curl -X POST $EROOM_BASE_URL/room/create \
     -H "Authorization: $EROOM_API_KEY" \
@@ -212,8 +212,8 @@ curl $EROOM_BASE_URL/health \
 
 <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🎨 테마별 룸 생성</h4>
-  
-  **batch-create.sh:**
+
+**batch-create.sh:**
   ```bash
   #!/bin/bash
   
@@ -341,8 +341,8 @@ done
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">💾 결과 파일 처리</h4>
-  
-  **process-result.sh:**
+
+**process-result.sh:**
   ```bash
   #!/bin/bash
   
@@ -586,6 +586,44 @@ for endpoint in "${ENDPOINTS[@]}"; do
   echo ""
   echo "평균 응답 시간: ${avg_time}초"
 done
+```
+
+---
+
+## 🔐 보안 테스트
+
+### API 키 검증
+
+```bash
+#!/bin/bash
+# security-test.sh
+
+echo "🔐 보안 테스트"
+echo "============="
+
+# 1. 인증 없이 요청
+echo ""
+echo "1️⃣ 인증 없이 요청:"
+curl -s $EROOM_BASE_URL/health | jq '.'
+
+# 2. 잘못된 API 키
+echo ""
+echo "2️⃣ 잘못된 API 키:"
+curl -s $EROOM_BASE_URL/health \
+  -H "Authorization: wrong_api_key" | jq '.'
+
+# 3. SQL Injection 시도
+echo ""
+echo "3️⃣ SQL Injection 테스트:"
+curl -s -X POST $EROOM_BASE_URL/room/create \
+  -H "Authorization: $EROOM_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "uuid": "user\"; DROP TABLE users;--",
+    "theme": "test",
+    "keywords": ["test"],
+    "room_prefab": "https://example.com/test.fbx"
+  }' | jq '.'
 ```
 
 ---

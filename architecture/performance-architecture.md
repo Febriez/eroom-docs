@@ -11,19 +11,19 @@
 
 ## 🤖 AI 모델 성능 비교
 
-### Claude Sonnet 4 성능 분석
+### Claude 3.5 Sonnet 성능 분석
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
-  <h4 style="margin: 0 0 15px 0;">📊 Claude Sonnet 4 벤치마크</h4>
+  <h4 style="margin: 0 0 15px 0;">📊 Claude 3.5 Sonnet 벤치마크</h4>
 
-| 모델 정보                | 값                        | 설명                 |
-  |----------------------|--------------------------|--------------------|
-| **모델명**              | claude-sonnet-4-20250514 | 최신 Claude Sonnet 4 |
-| **최대 토큰**            | 16,000                   | 충분한 출력 용량          |
-| **시나리오 Temperature** | 0.9                      | 높은 창의성             |
-| **스크립트 Temperature** | 0.1                      | 높은 정확성             |
-| **응답 시간**            | 1-3초                     | 빠른 처리 속도           |
-| **정확도**              | 98%+                     | 높은 품질 보장           |
+| 모델 정보                | 값                          | 설명                   |
+|----------------------|----------------------------|----------------------|
+| **모델명**              | claude-3-5-sonnet-20241022 | 최신 Claude 3.5 Sonnet |
+| **최대 토큰**            | 16,000                     | 충분한 출력 용량            |
+| **시나리오 Temperature** | 0.9                        | 높은 창의성               |
+| **스크립트 Temperature** | 0.1                        | 높은 정확성               |
+| **응답 시간**            | 1-3초                       | 빠른 처리 속도             |
+| **정확도**              | 98%+                       | 높은 품질 보장             |
 
 </div>
 
@@ -40,7 +40,7 @@
       <th>선택 이유</th>
     </tr>
     <tr style="background: #c5cae9;">
-      <td><strong>Claude 4 Sonnet</strong></td>
+      <td><strong>Claude 3.5 Sonnet</strong></td>
       <td><strong>88.7%</strong></td>
       <td><strong>92.0%</strong></td>
       <td><strong>95/100</strong></td>
@@ -78,7 +78,7 @@
   </p>
 </div>
 
-### Claude 4 Sonnet 선택 근거
+### Claude 3.5 Sonnet 선택 근거
 
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
   <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; text-align: center;">
@@ -239,20 +239,20 @@ title 룸 생성 전체 프로세스 타임라인
 dateFormat mm:ss
 axisFormat %M:%S
 
-      section API 처리
-      요청 검증          :done, api1, 00:00, 1s
-      큐 등록           :done, api2, after api1, 1s
-      
-      section AI 처리
-      시나리오 생성      :active, ai1, after api2, 60s
-      스크립트 생성      :active, ai2, after ai1, 20s
-      
-      section 3D 모델
-      프리뷰 생성       :crit, 3d1, after api2, 180s
-      모델 정제         :crit, 3d2, after 3d1, 300s
-      
-      section 최종
-      결과 통합         :done, final, after ai2, 10s
+    section API 처리
+    요청 검증          :done, api1, 00:00, 1s
+    큐 등록           :done, api2, after api1, 1s
+    
+    section AI 처리
+    시나리오 생성      :active, ai1, after api2, 60s
+    스크립트 생성      :active, ai2, after ai1, 20s
+    
+    section 3D 모델
+    프리뷰 생성       :crit, 3d1, after api2, 180s
+    모델 정제         :crit, 3d2, after 3d1, 300s
+    
+    section 최종
+    결과 통합         :done, final, after ai2, 10s
 
 {% endmermaid %}
 
@@ -296,7 +296,7 @@ axisFormat %M:%S
   <h4 style="margin: 0 0 15px 0;">💡 압축된 프롬프트 성능</h4>
 
 | 지표          | 기존     | 최적화 후  | 개선율  |
-  |-------------|--------|--------|------|
+|-------------|--------|--------|------|
 | **프롬프트 길이** | 1,500자 | 800자   | -47% |
 | **입력 토큰**   | 2,000개 | 1,100개 | -45% |
 | **처리 시간**   | 90초    | 60초    | -33% |
@@ -327,9 +327,10 @@ CompletableFuture<Map<String, String>> scriptFuture =
     <h4 style="margin: 0 0 10px 0;">🔄 현재 최적화</h4>
     <ul style="margin: 0;">
       <li>압축된 프롬프트 (-50% 토큰)</li>
-      <li>AI 서비스 병렬 호출</li>
-      <li>다중 Meshy API 키 로드밸런싱</li>
       <li>마크다운 출력 형식</li>
+      <li>미니파이드 코드 생성</li>
+      <li>다중 Meshy API 키 로드밸런싱</li>
+      <li>병렬 모델 생성</li>
     </ul>
   </div>
   <div style="background: #e8f5e9; padding: 20px; border-radius: 10px;">
@@ -339,6 +340,7 @@ CompletableFuture<Map<String, String>> scriptFuture =
       <li>스트리밍 응답</li>
       <li>Redis 결과 캐싱</li>
       <li>CDN 통합</li>
+      <li>GPU 가속</li>
     </ul>
   </div>
 </div>
@@ -421,6 +423,29 @@ CompletableFuture<Map<String, String>> scriptFuture =
     <small>시간당 룸 수</small>
   </div>
 </div>
+
+---
+
+## 🔧 서버 설정 최적화
+
+### JVM 최적화 설정
+
+```bash
+# JVM 옵션 설정 (start.sh)
+JVM_OPTS="-Xms512m -Xmx2g -XX:+UseG1GC \
+          -XX:MaxGCPauseMillis=200 \
+          -XX:+UseStringDeduplication \
+          -XX:+OptimizeStringConcat"
+```
+
+### 동시 처리 설정
+
+```java
+// 현재 설정: MAX_CONCURRENT_REQUESTS = 1
+// 다중 처리 시 리소스 사용량 고려
+private static final int MAX_CONCURRENT_REQUESTS = 1;
+private static final int MODEL_GENERATION_THREADS = 10;
+```
 
 ---
 
