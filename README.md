@@ -48,19 +48,20 @@ ERoom은 **Anthropic**사의 **Claude Sonnet 4**와 **Meshy.AI**를 활용하여
 ## 🔄 시스템 워크플로우
 
 ```mermaid
-graph LR
-A["Unity 클라이언트"] --> B["HTTP 요청"]
-B --> C["서버 큐 등록"]
-C --> D["AI 시나리오 생성"]
-D --> E["3D 모델 생성"]
-D --> F["스크립트 생성"]
-E --> G["결과 통합"]
-F --> G
-G --> H["HTTP 응답"]
-H --> I["Unity 적용"]
-style D fill:#4a90e2
-style E fill:#f39c12
-style F fill:#27ae60
+graph TD
+    A["Unity 클라이언트"] --> B["HTTP 요청"]
+    B --> C["서버 큐 등록"]
+    C --> D["AI 시나리오 생성"]
+    D --> E["3D 모델 생성"]
+    D --> F["스크립트 생성"]
+    E --> G["결과 통합"]
+    F --> G
+    G --> H["HTTP 응답"]
+    H --> I["Unity 적용"]
+
+    style D fill:#4a90e2,color:#fff
+    style E fill:#f39c12,color:#fff
+    style F fill:#27ae60,color:#fff
 ```
 
 ---
