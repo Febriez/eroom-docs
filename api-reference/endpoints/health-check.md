@@ -90,13 +90,13 @@ Authorization: your_api_key
 }
 ```
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| status | String | 서버 건강 상태 |
-| queue | Object | 큐 상태 정보 |
-| queue.queued | Integer | 대기 중인 요청 수 |
-| queue.active | Integer | 현재 처리 중인 요청 수 |
-| queue.completed | Integer | 완료된 총 요청 수 |
+| 필드                  | 타입      | 설명            |
+|---------------------|---------|---------------|
+| status              | String  | 서버 건강 상태      |
+| queue               | Object  | 큐 상태 정보       |
+| queue.queued        | Integer | 대기 중인 요청 수    |
+| queue.active        | Integer | 현재 처리 중인 요청 수 |
+| queue.completed     | Integer | 완료된 총 요청 수    |
 | queue.maxConcurrent | Integer | 최대 동시 처리 가능 수 |
 
 ---
@@ -189,7 +189,7 @@ done
 ## 주의사항
 
 1. **인증 필수**: Authorization 헤더 없이는 401 오류 발생
-2. **응답 속도**: 일반적으로 10-20ms 이내 응답
+2. **응답 속도**: 일반적으로 10ms 이내 응답
 3. **모니터링 주기**: 과도한 헬스체크는 서버 부하 유발 (10초 이상 권장)
 4. **환경 변수**: EROOM_PRIVATE_KEY가 설정되지 않으면 자동 생성된 키 사용
 
