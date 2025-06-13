@@ -166,7 +166,7 @@ ERoom 서버는 Unity 클라이언트와 HTTP 통신으로 연동되어 방탈�
 
 ---
 
-## 📐 시스템 요구사항
+## 📐 시스템
 
 ### 서버 실행 환경
 
@@ -175,16 +175,6 @@ ERoom 서버는 Unity 클라이언트와 HTTP 통신으로 연동되어 방탈�
 | **Java** | 17     |
 | **메모리**  | 8GB    |
 | **CPU**  | 6 Core |
-
-### 필수 환경 변수
-
-```bash
-ANTHROPIC_KEY=sk-ant-api03-...      # Claude API 키
-MESHY_KEY_1=...                      # Meshy API 키 1
-MESHY_KEY_2=...                      # Meshy API 키 2
-MESHY_KEY_3=...                      # Meshy API 키 3
-EROOM_PRIVATE_KEY=secure-api-key # 서버 인증 키
-```
 
 ---
 
