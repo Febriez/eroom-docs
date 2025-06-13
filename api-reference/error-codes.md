@@ -62,76 +62,80 @@
 
 <div style="background: #ffcdd2; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔐 401 Unauthorized</h4>
-  
-  **헤더 누락:**
+
+**헤더 누락:**
   ```json
   {
     "error": "인증이 필요합니다"
   }
   ```
-  
-  **잘못된 API 키:**
+
+**잘못된 API 키:**
   ```json
   {
-    "error": "인증 실패"
-  }
+  "error": "인증 실패"
+}
   ```
-  
-  **해결 방법:**
-  - Authorization 헤더 확인
-  - API 키 값 검증
-  - 환경 변수 설정 확인
+
+**해결 방법:**
+- Authorization 헤더 확인
+- API 키 값 검증
+- 환경 변수 설정 확인
 </div>
 
 ### 2. POST /room/create 에러
 
 <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">📝 400 Bad Request</h4>
-  
-  **JSON 파싱 실패:**
+
+**JSON 파싱 실패:**
   ```json
   {
     "success": false,
-    "error": "Failed to parse JSON request body."
+    "error": "JSON 요청 본문 파싱에 실패했습니다.",
+    "timestamp": "1234567890"
   }
   ```
-  
-  **필수 필드 누락:**
+
+**필수 필드 누락:**
   ```json
   {
     "success": false,
-    "error": "Invalid request body or missing 'uuid' (userId)."
+    "error": "유효하지 않은 요청 본문 또는 'uuid' (userId)가 누락되었습니다.",
+    "timestamp": "1234567890"
   }
   ```
-  
-  **검증 실패 메시지들:**
-  - "UUID가 비어있습니다"
-  - "테마가 비어있습니다"
-  - "키워드가 비어있습니다"
-  - "빈 키워드가 포함되어 있습니다"
-  - "roomPrefab URL이 비어있습니다"
-  - "유효하지 않은 roomPrefab URL 형식입니다"
-  - "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요."
+
+**검증 실패 메시지들:**
+- "UUID가 비어있습니다"
+- "테마가 비어있습니다"
+- "키워드가 비어있습니다"
+- "빈 키워드가 포함되어 있습니다"
+- "roomPrefab URL이 비어있습니다"
+- "유효하지 않은 roomPrefab URL 형식입니다"
+- "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요."
 </div>
 
 ### 3. GET /room/result 에러
 
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔍 조회 관련 에러</h4>
-  
-  **400 Bad Request - 파라미터 누락:**
+
+**400 Bad Request - 파라미터 누락:**
   ```json
   {
     "success": false,
-    "error": "Query parameter 'ruid' is required."
+    "error": "쿼리 파라미터 'ruid'가 필요합니다.",
+    "timestamp": "1234567890"
   }
   ```
-  
-  **404 Not Found - 결과 없음:**
+
+**404 Not Found - 결과 없음:**
   ```json
   {
     "success": false,
-    "error": "Job with ruid 'room_12345' not found. It may have been already claimed or never existed."
+    "error": "ruid 'room_12345'에 해당하는 작업을 찾을 수 없습니다. 이미 처리되었거나 존재하지 않는 작업입니다.",
+    "timestamp": "1234567890"
   }
   ```
 </div>
@@ -144,8 +148,8 @@
 
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">⚙️ 처리 단계별 에러</h4>
-  
-  **시나리오 생성 실패:**
+
+**시나리오 생성 실패:**
   ```json
   {
     "ruid": "room_12345",
@@ -155,8 +159,8 @@
     "timestamp": "1234567890"
   }
   ```
-  
-  **스크립트 생성 실패:**
+
+**스크립트 생성 실패:**
   ```json
   {
     "success": false,
@@ -164,8 +168,8 @@
     "timestamp": "1234567890"
   }
   ```
-  
-  **시스템 오류:**
+
+**시스템 오류:**
   ```json
   {
     "success": false,
@@ -195,6 +199,7 @@
 | API 키 누락 | "Anthropic API 키가 설정되지 않았습니다" | 서버 종료 |
 | 설정 오류 | "프롬프트 설정을 찾을 수 없습니다" | 서버 종료 |
 | AI 응답 없음 | "시나리오 생성 응답이 비어있습니다" | 서버 종료 |
+| JSON 파싱 실패 | "JSON 파싱 실패" | 서버 종료 |
 
 ---
 
@@ -387,6 +392,32 @@ async function retryableRequest(fn, maxRetries = 3) {
   throw lastError;
 }
 ```
+
+---
+
+## 🔒 서버 종료 조건
+
+### 치명적 에러 (서버 즉시 종료)
+
+<div style="background: #ffcdd2; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <h4 style="margin: 0 0 15px 0;">☠️ 서버 종료를 유발하는 에러</h4>
+
+1. **환경 설정 오류**
+    - Anthropic API 키 미설정
+    - 필수 프롬프트 설정 누락
+    - config.json 파일 없음
+
+2. **AI 서비스 오류**
+    - AI 응답이 null 또는 비어있음
+    - JSON 파싱 실패
+    - 프롬프트 설정 찾을 수 없음
+
+3. **시스템 오류**
+    - Base64 인코딩 실패
+    - 파일 시스템 오류
+
+이러한 에러 발생 시 `System.exit(1)`이 호출되어 서버가 즉시 종료됩니다.
+</div>
 
 ---
 

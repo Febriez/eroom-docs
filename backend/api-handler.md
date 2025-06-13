@@ -17,19 +17,19 @@
 
 ```java
 public class ApiHandler implements RequestHandler {
-    private static final Logger log = LoggerFactory.getLogger(ApiHandler.class);
+  private static final Logger log = LoggerFactory.getLogger(ApiHandler.class);
 
-    private final Gson gson;
-    private final QueueManager queueManager;
-    private final JobResultStore resultStore;
-    private final ResponseFormatter responseFormatter;
+  private final Gson gson;
+  private final QueueManager queueManager;
+  private final JobResultStore resultStore;
+  private final ResponseFormatter responseFormatter;
 
-    public ApiHandler(Gson gson, QueueManager queueManager, JobResultStore resultStore) {
-        this.gson = gson;
-        this.queueManager = queueManager;
-        this.resultStore = resultStore;
-        this.responseFormatter = new ResponseFormatter(gson);
-    }
+  public ApiHandler(Gson gson, QueueManager queueManager, JobResultStore resultStore) {
+    this.gson = gson;
+    this.queueManager = queueManager;
+    this.resultStore = resultStore;
+    this.responseFormatter = new ResponseFormatter(gson);
+  }
 }
 ```
 
@@ -55,7 +55,6 @@ A --> E[ResponseFormatter]
     style B fill:#f39c12
     style C fill:#2ecc71
     style D fill:#e74c3c
-
 {% endmermaid %}
 {% endhint %}
 
@@ -74,7 +73,6 @@ A --> E[ResponseFormatter]
 **구현:**
 
 ```java
-
 @Override
 public void handleRoot(HttpServerExchange exchange) {
     JsonObject response = new JsonObject();
@@ -112,7 +110,6 @@ public void handleRoot(HttpServerExchange exchange) {
 **구현:**
 
 ```java
-
 @Override
 public void handleHealth(HttpServerExchange exchange) {
     JsonObject response = new JsonObject();
@@ -174,7 +171,6 @@ F --> G[202 응답]
 **구현 상세:**
 
 ```java
-
 @Override
 public void handleRoomCreate(HttpServerExchange exchange) {
     exchange.getRequestReceiver().receiveFullString((httpServerExchange, message) -> {
@@ -267,7 +263,6 @@ private void handleCompletedJob(HttpServerExchange exchange, String ruid,
 ### 5️⃣ **handleQueueStatus() - 큐 상태 조회**
 
 ```java
-
 @Override
 public void handleQueueStatus(HttpServerExchange exchange) {
     responseFormatter.sendJsonResponse(exchange, StatusCodes.OK,
@@ -317,7 +312,7 @@ public class ResponseFormatter {
 **장점:**
 
 - 일관된 응답 구조
-- 자동 Content-Type 설정
+- 자동 Content-Type 설정 (application/json; charset=utf-8)
 - 에러 처리 표준화
 - 로깅 통합
 
@@ -332,15 +327,13 @@ public class ResponseFormatter {
 #### 🔄 **Non-blocking 처리**
 
 ```java
-exchange.getRequestReceiver().
-
-receiveFullString((httpExchange, message) ->{
-        // 요청 본문 처리
-        // JSON 파싱
-        // 비즈니스 로직
-        },(httpExchange,e)->{
-        // 에러 처리
-        });
+exchange.getRequestReceiver().receiveFullString((httpExchange, message) -> {
+    // 요청 본문 처리
+    // JSON 파싱
+    // 비즈니스 로직
+}, (httpExchange, e) -> {
+    // 에러 처리
+});
 ```
 
 **장점:**
@@ -367,7 +360,6 @@ E --> F[값 검증]
     B --> G[API Key]
     D --> H[필수 필드]
     F --> I[값 범위/형식]
-
 {% endmermaid %}
 
 ### 검증 실패 처리
@@ -420,20 +412,20 @@ E --> F[값 검증]
 
 ### 에러 응답 예시
 
-```java
+```json
 // 잘못된 요청
 {
-        "success":false,
-        "error":"유효하지 않은 요청 본문 또는 'uuid' (userId)가 누락되었습니다.",
-        "timestamp":"1234567890"
-        }
+  "success": false,
+  "error": "유효하지 않은 요청 본문 또는 'uuid' (userId)가 누락되었습니다.",
+  "timestamp": "1234567890"
+}
 
 // 리소스 없음
-        {
-        "success":false,
-        "error":"ruid 'room_xxx'에 해당하는 작업을 찾을 수 없습니다. 이미 처리되었거나 존재하지 않는 작업입니다.",
-        "timestamp":"1234567890"
-        }
+{
+  "success": false,
+  "error": "ruid 'room_xxx'에 해당하는 작업을 찾을 수 없습니다. 이미 처리되었거나 존재하지 않는 작업입니다.",
+  "timestamp": "1234567890"
+}
 ```
 
 ---
@@ -444,7 +436,7 @@ E --> F[값 검증]
 
 ```java
 private boolean isInvalidRequest(RoomCreationRequest request) {
-    return request == null || request.getUuid() == null || request.getUuid().trim().isEmpty();
+  return request == null || request.getUuid() == null || request.getUuid().trim().isEmpty();
 }
 ```
 
@@ -452,11 +444,11 @@ private boolean isInvalidRequest(RoomCreationRequest request) {
 
 ```java
 private JsonObject createRoomCreationResponse(String ruid) {
-    JsonObject response = new JsonObject();
-    response.addProperty("ruid", ruid);
-    response.addProperty("status", "대기중");
-    response.addProperty("message", "방 생성 요청이 수락되었습니다. 상태 확인을 위해 /room/result?ruid=" + ruid + "를 폴링하세요.");
-    return response;
+  JsonObject response = new JsonObject();
+  response.addProperty("ruid", ruid);
+  response.addProperty("status", "대기중");
+  response.addProperty("message", "방 생성 요청이 수락되었습니다. 상태 확인을 위해 /room/result?ruid=" + ruid + "를 폴링하세요.");
+  return response;
 }
 ```
 
@@ -464,7 +456,7 @@ private JsonObject createRoomCreationResponse(String ruid) {
 
 ```java
 private String extractRuidFromQuery(HttpServerExchange exchange) {
-    return responseFormatter.getQueryParam(exchange, "ruid").orElse(null);
+  return responseFormatter.getQueryParam(exchange, "ruid").orElse(null);
 }
 ```
 

@@ -38,7 +38,6 @@ end
     style RCR fill:#4a90e2
     style RCR2 fill:#4caf50
     style JS fill:#f39c12
-
 {% endmermaid %}
 
 ---
@@ -52,18 +51,17 @@ end
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">룸 생성 요청 데이터</h4>
 
-| 필드          | 타입       | 필수 | 설명                  | 제약사항                           |
-|-------------|----------|----|---------------------|--------------------------------|
-| uuid        | String   | ✅  | 사용자 고유 식별자          | 비어있지 않음                        |
-| theme       | String   | ✅  | 방탈출 테마 (예: "우주정거장") | 비어있지 않음                        |
-| keywords    | String[] | ✅  | 키워드 배열 (최소 1개)      | 빈 키워드 없음                       |
-| difficulty  | String   | ❌  | 난이도                 | easy/normal/hard (기본값: normal) |
-| room_prefab | String   | ✅  | Unity 프리팹 URL       | https:// 로 시작                  |
+| 필드 | 타입 | 필수 | 설명 | 제약사항 |
+|------|------|------|------|----------|
+| uuid | String | ✅ | 사용자 고유 식별자 | 비어있지 않음 |
+| theme | String | ✅ | 방탈출 테마 (예: "우주정거장") | 비어있지 않음 |
+| keywords | String[] | ✅ | 키워드 배열 (최소 1개) | 빈 키워드 없음 |
+| difficulty | String | ❌ | 난이도 | easy/normal/hard (기본값: normal) |
+| room_prefab | String | ✅ | Unity 프리팹 URL | https:// 로 시작 |
 
 </div>
 
 ```java
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -72,16 +70,16 @@ public class RoomCreationRequest {
     private String theme;
     private String[] keywords;
     private String difficulty;
-
+    
     @SerializedName("room_prefab")
     private String roomPrefab;
-
+    
     @Nullable
     public String getValidatedDifficulty() {
         if (difficulty == null || difficulty.trim().isEmpty()) {
             return "normal"; // 기본값
         }
-
+        
         String normalized = difficulty.trim().toLowerCase();
         return switch (normalized) {
             case "easy", "normal", "hard" -> normalized;
@@ -102,10 +100,9 @@ public class RoomCreationRequest {
 
 ```java
 public record JobState(
-        Status status,      // QUEUED, PROCESSING, COMPLETED, FAILED
-        JsonObject result   // 최종 결과 또는 에러 정보
-) {
-}
+    Status status,      // QUEUED, PROCESSING, COMPLETED, FAILED
+    JsonObject result   // 최종 결과 또는 에러 정보
+) {}
 ```
 
 <div style="margin-top: 15px;">
@@ -127,10 +124,9 @@ FAILED --> [*]
 
 ```java
 private record QueuedRoomRequest(
-        String ruid,                    // 서버 생성 고유 ID
-        RoomCreationRequest request     // 원본 요청 데이터
-) {
-}
+    String ruid,                    // 서버 생성 고유 ID
+    RoomCreationRequest request     // 원본 요청 데이터
+) {}
 ```
 
 #### ModelGenerationResult
@@ -138,13 +134,12 @@ private record QueuedRoomRequest(
 <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">3D 모델 생성 결과</h4>
 
-| 필드         | 타입     | 설명                           |
-|------------|--------|------------------------------|
-| objectName | String | 오브젝트 이름 (예: "SpaceHelmet")   |
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| objectName | String | 오브젝트 이름 (예: "SpaceHelmet") |
 | trackingId | String | Meshy AI 추적 ID, URL 또는 에러 코드 |
 
 ```java
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -153,7 +148,6 @@ public class ModelGenerationResult {
     private String trackingId;
 }
 ```
-
 </div>
 
 ---
@@ -172,26 +166,17 @@ public class ModelGenerationResult {
 #### 실제 사용되는 응답 구조 (JsonObject)
 
 **성공 응답:**
-
 ```json
 {
   "uuid": "user_12345",
   "ruid": "room_a1b2c3d4e5f6",
   "theme": "우주정거장",
   "difficulty": "normal",
-  "keywords": [
-    "미래",
-    "과학",
-    "생존"
-  ],
+  "keywords": ["미래", "과학", "생존"],
   "room_prefab": "https://example.com/prefab/space_station.fbx",
   "scenario": {
-    "scenario_data": {
-      ...
-    },
-    "object_instructions": [
-      ...
-    ]
+    "scenario_data": { ... },
+    "object_instructions": [ ... ]
   },
   "scripts": {
     "GameManager.cs": "base64_encoded_content",
@@ -207,7 +192,6 @@ public class ModelGenerationResult {
 ```
 
 **에러 응답:**
-
 ```json
 {
   "ruid": "room_12345",
@@ -249,7 +233,6 @@ JobState ||--|| JsonObject : "results in"
         json model_tracking
         boolean success
     }
-
 {% endmermaid %}
 
 ---
@@ -295,7 +278,6 @@ JobState ||--|| JsonObject : "results in"
   ]
 }
 ```
-
 </div>
 
 ### Scripts 객체 구조
@@ -321,7 +303,6 @@ string decodedScript = Encoding.UTF8.GetString(
     Convert.FromBase64String(base64String)
 );
 ```
-
   </div>
 </div>
 
@@ -343,12 +324,10 @@ string decodedScript = Encoding.UTF8.GetString(
 ```
 
 **추적 ID 타입:**
-
 - URL 형식: 직접 다운로드 가능한 FBX 파일
 - res_ 접두사: Meshy API 리소스 ID
 - error_ 접두사: 생성 실패한 모델
 - timeout_ 접두사: 시간 초과된 모델
-
 </div>
 
 ---
@@ -357,20 +336,20 @@ string decodedScript = Encoding.UTF8.GetString(
 
 ### 입력 검증 (RoomRequestValidator)
 
-| 필드          | 검증 규칙                         |
-|-------------|-------------------------------|
-| uuid        | 비어있지 않음, 공백 제거                |
-| theme       | 비어있지 않음, 최대 100자              |
-| keywords    | 최소 1개, 각 키워드 비어있지 않음          |
-| difficulty  | easy/normal/hard 중 하나 또는 null |
-| room_prefab | https:// 로 시작하는 유효한 URL       |
+| 필드 | 검증 규칙 |
+|------|-----------|
+| uuid | 비어있지 않음, 공백 제거 |
+| theme | 비어있지 않음, 최대 100자 |
+| keywords | 최소 1개, 각 키워드 비어있지 않음 |
+| difficulty | easy/normal/hard 중 하나 또는 null |
+| room_prefab | https:// 로 시작하는 유효한 URL |
 
 ### 시나리오 검증 (DefaultScenarioValidator)
 
 ```java
 private void validateStructure(JsonObject scenario) {
-    if (!scenario.has("scenario_data") ||
-            !scenario.has("object_instructions")) {
+    if (!scenario.has("scenario_data") || 
+        !scenario.has("object_instructions")) {
         throw new RuntimeException("시나리오 구조가 올바르지 않습니다");
     }
 }
@@ -380,7 +359,7 @@ private void validateObjectInstructions(JsonObject scenario) {
     if (objects.isEmpty()) {
         throw new RuntimeException("오브젝트 설명이 없습니다");
     }
-
+    
     // GameManager 확인
     JsonObject firstObject = objects.get(0).getAsJsonObject();
     if (!firstObject.get("name").getAsString().equals("GameManager")) {
@@ -414,20 +393,19 @@ firestore/
         ├── total_rooms
         └── daily_usage
 ```
-
 </div>
 
 ---
 
 ## 📊 데이터 크기 예측
 
-| 데이터 유형      | 평균 크기  | 최대 크기  |
-|-------------|--------|--------|
-| 요청 데이터      | ~1 KB  | 5 KB   |
-| 시나리오        | ~10 KB | 50 KB  |
-| 스크립트 (각)    | ~5 KB  | 20 KB  |
-| 전체 응답       | ~50 KB | 200 KB |
-| 3D 모델 메타데이터 | ~2 KB  | 5 KB   |
+| 데이터 유형 | 평균 크기 | 최대 크기 |
+|-------------|-----------|-----------|
+| 요청 데이터 | ~1 KB | 5 KB |
+| 시나리오 | ~10 KB | 50 KB |
+| 스크립트 (각) | ~5 KB | 20 KB |
+| 전체 응답 | ~50 KB | 200 KB |
+| 3D 모델 메타데이터 | ~2 KB | 5 KB |
 
 ---
 

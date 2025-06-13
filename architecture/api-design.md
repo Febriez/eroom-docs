@@ -11,13 +11,13 @@
 
 ## 📋 API 엔드포인트 요약
 
-| 메서드  | 경로                     | 목적       | 응답 시간   |
-|------|------------------------|----------|---------|
-| GET  | /                      | 서버 상태 확인 | < 10ms  |
-| GET  | /health                | 상세 헬스체크  | < 20ms  |
-| POST | /room/create           | 룸 생성 요청  | < 100ms |
-| GET  | /room/result?ruid={id} | 결과 조회    | < 50ms  |
-| GET  | /queue/status          | 큐 상태 확인  | < 20ms  |
+| 메서드 | 경로 | 목적 | 응답 시간 |
+|--------|------|------|-----------|
+| GET | / | 서버 상태 확인 | < 10ms |
+| GET | /health | 상세 헬스체크 | < 20ms |
+| POST | /room/create | 룸 생성 요청 | < 100ms |
+| GET | /room/result?ruid={id} | 결과 조회 | < 50ms |
+| GET | /queue/status | 큐 상태 확인 | < 20ms |
 
 ---
 
@@ -33,7 +33,6 @@ Content-Type: application/json; charset=utf-8
 ```
 
 **API Key 설정 방법:**
-
 ```bash
 # 환경 변수로 설정
 export EROOM_PRIVATE_KEY="your-secure-api-key"
@@ -73,7 +72,6 @@ participant AI Services
     
     Client->>Server: GET /room/result?ruid=room_12345
     Server-->>Client: { "status": "COMPLETED", data... }
-
 {% endmermaid %}
 
 ---
@@ -89,7 +87,6 @@ participant AI Services
 **POST /room/create**
 
 요청 본문:
-
 ```json
 {
   "uuid": "user_12345",
@@ -110,7 +107,6 @@ participant AI Services
 **HTTP/1.1 202 Accepted**
 
 응답 본문:
-
 ```json
 {
   "ruid": "room_a1b2c3d4e5f6",
@@ -205,14 +201,14 @@ participant AI Services
 
 ## 📊 HTTP 상태 코드 활용
 
-| HTTP 코드                   | 의미     | 사용 시나리오       |
-|---------------------------|--------|---------------|
-| 200 OK                    | 성공     | GET 요청 성공     |
-| 202 Accepted              | 수락됨    | 비동기 작업 시작     |
-| 400 Bad Request           | 잘못된 요청 | 필수 파라미터 누락    |
-| 401 Unauthorized          | 인증 실패  | API 키 누락/오류   |
-| 404 Not Found             | 없음     | ruid가 존재하지 않음 |
-| 500 Internal Server Error | 서버 오류  | 예상치 못한 오류     |
+| HTTP 코드 | 의미 | 사용 시나리오 |
+|-----------|------|---------------|
+| 200 OK | 성공 | GET 요청 성공 |
+| 202 Accepted | 수락됨 | 비동기 작업 시작 |
+| 400 Bad Request | 잘못된 요청 | 필수 파라미터 누락 |
+| 401 Unauthorized | 인증 실패 | API 키 누락/오류 |
+| 404 Not Found | 없음 | ruid가 존재하지 않음 |
+| 500 Internal Server Error | 서버 오류 | 예상치 못한 오류 |
 
 ---
 
@@ -249,15 +245,15 @@ const pollInterval = {
 
 async function pollResult(ruid) {
     let interval = pollInterval.initial;
-
+    
     while (true) {
         const result = await fetch(`/room/result?ruid=${ruid}`);
         const data = await result.json();
-
+        
         if (data.status === 'COMPLETED' || data.status === 'FAILED') {
             return data;
         }
-
+        
         await sleep(interval);
         interval = Math.min(interval * pollInterval.multiplier, pollInterval.max);
     }
@@ -278,7 +274,6 @@ async function pollResult(ruid) {
 - [ ] HTTPS 사용 (프로덕션)
 - [ ] 주기적 키 로테이션
 - [ ] 접근 로그 모니터링
-
 </div>
 
 ### 입력 검증
@@ -287,18 +282,11 @@ async function pollResult(ruid) {
 
 ```java
 // RoomRequestValidator에서 검증
--UUID:
-비어있지 않음
--Theme:
-비어있지 않음
--Keywords:최소 1개,
-빈 키워드
-없음
--Difficulty:easy/normal/
-hard 중
-하나
--
-Room Prefab:https:// 로 시작하는 유효한 URL
+- UUID: 비어있지 않음
+- Theme: 비어있지 않음
+- Keywords: 최소 1개, 빈 키워드 없음
+- Difficulty: easy/normal/hard 중 하나
+- Room Prefab: https:// 로 시작하는 유효한 URL
 ```
 
 ---
@@ -310,9 +298,7 @@ Room Prefab:https:// 로 시작하는 유효한 URL
 ```json
 {
   "success": true,
-  "data": {
-    ...
-  },
+  "data": { ... },
   "timestamp": "1234567890"
 }
 ```

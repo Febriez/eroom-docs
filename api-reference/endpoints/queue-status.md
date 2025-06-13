@@ -44,7 +44,7 @@ Authorization: your_api_key
 | `queued` | Integer | 현재 큐에 대기 중인 요청 수 |
 | `active` | Integer | 현재 처리 중인 요청 수 |
 | `completed` | Integer | 서버 시작 이후 완료된 총 요청 수 |
-| `maxConcurrent` | Integer | 동시에 처리 가능한 최대 요청 수 |
+| `maxConcurrent` | Integer | 동시에 처리 가능한 최대 요청 수 (현재: 1) |
 
 ### 에러 응답 (401 Unauthorized)
 
@@ -364,6 +364,25 @@ class AdaptiveMonitor {
 
 ---
 
+## 시스템 정보
+
+### 현재 설정
+
+<div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
+  <h4 style="margin: 0 0 15px 0;">⚙️ 서버 설정</h4>
+
+| 설정 | 값 | 설명 |
+|------|-----|------|
+| `maxConcurrent` | 1 | 동시 처리 제한 |
+| 워커 스레드 | 1 | 큐 처리 스레드 수 |
+| 모델 생성 스레드 | 10 | 3D 모델 병렬 처리 |
+
+현재 서버는 **한 번에 하나의 룸만** 처리하도록 설정되어 있습니다.
+이는 AI API의 안정성과 비용 최적화를 위한 설계입니다.
+</div>
+
+---
+
 ## 문제 해결
 
 | 증상 | 가능한 원인 | 해결 방법 |
@@ -371,6 +390,7 @@ class AdaptiveMonitor {
 | queued가 계속 증가 | 서버 처리 속도 저하 | 서버 리소스 확인 |
 | active가 0 | 워커 스레드 문제 | 서버 재시작 |
 | 401 오류 | API 키 문제 | Authorization 헤더 확인 |
+| completed가 증가하지 않음 | 처리 오류 발생 | 서버 로그 확인 |
 
 ---
 

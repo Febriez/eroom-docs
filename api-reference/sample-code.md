@@ -47,12 +47,12 @@ curl $EROOM_BASE_URL/health \
 **request.json:**
   ```json
   {
-  "uuid": "user_12345",
-  "theme": "미래 우주정거장",
-  "keywords": ["SF", "퍼즐", "생존", "우주"],
-  "difficulty": "normal",
-  "room_prefab": "https://example.com/prefabs/space_station.fbx"
-}
+    "uuid": "user_12345",
+    "theme": "미래 우주정거장",
+    "keywords": ["SF", "퍼즐", "생존", "우주"],
+    "difficulty": "normal",
+    "room_prefab": "https://example.com/prefabs/space_station.fbx"
+  }
   ```
 
 **cURL 명령:**
@@ -169,9 +169,9 @@ curl $EROOM_BASE_URL/health \
 **모든 요청에 필요한 헤더:**
   ```json
   {
-  "Authorization": "your_api_key_here",
-  "Content-Type": "application/json; charset=utf-8"
-}
+    "Authorization": "your_api_key_here",
+    "Content-Type": "application/json; charset=utf-8"
+  }
   ```
 
 **cURL에서 헤더 설정:**

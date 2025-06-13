@@ -3,7 +3,6 @@
 ## GET / - 기본 상태 확인
 
 ### 개요
-
 서버의 기본 동작 상태를 확인하는 가장 간단한 엔드포인트입니다.
 
 ---
@@ -11,19 +10,16 @@
 ## 요청 상세
 
 ### HTTP 메서드
-
 ```
 GET /
 ```
 
 ### 필수 헤더
-
 ```http
 Authorization: your_api_key
 ```
 
 ### 요청 본문
-
 없음
 
 ---
@@ -39,10 +35,10 @@ Authorization: your_api_key
 }
 ```
 
-| 필드      | 타입     | 설명               |
-|---------|--------|------------------|
-| status  | String | 서버 상태 ("online") |
-| message | String | 상태 메시지           |
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| status | String | 서버 상태 ("online") |
+| message | String | 상태 메시지 |
 
 ### 에러 응답 (401 Unauthorized)
 
@@ -57,7 +53,6 @@ Authorization: your_api_key
 ## GET /health - 상세 헬스체크
 
 ### 개요
-
 서버의 상세한 상태와 큐 처리 통계를 제공합니다.
 
 ---
@@ -65,19 +60,16 @@ Authorization: your_api_key
 ## 요청 상세
 
 ### HTTP 메서드
-
 ```
 GET /health
 ```
 
 ### 필수 헤더
-
 ```http
 Authorization: your_api_key
 ```
 
 ### 요청 본문
-
 없음
 
 ---
@@ -98,13 +90,13 @@ Authorization: your_api_key
 }
 ```
 
-| 필드                  | 타입      | 설명            |
-|---------------------|---------|---------------|
-| status              | String  | 서버 건강 상태      |
-| queue               | Object  | 큐 상태 정보       |
-| queue.queued        | Integer | 대기 중인 요청 수    |
-| queue.active        | Integer | 현재 처리 중인 요청 수 |
-| queue.completed     | Integer | 완료된 총 요청 수    |
+| 필드 | 타입 | 설명 |
+|------|------|------|
+| status | String | 서버 건강 상태 |
+| queue | Object | 큐 상태 정보 |
+| queue.queued | Integer | 대기 중인 요청 수 |
+| queue.active | Integer | 현재 처리 중인 요청 수 |
+| queue.completed | Integer | 완료된 총 요청 수 |
 | queue.maxConcurrent | Integer | 최대 동시 처리 가능 수 |
 
 ---
@@ -218,7 +210,6 @@ set EROOM_PRIVATE_KEY=your-secure-api-key
 ```
 
 환경 변수가 설정되지 않은 경우:
-
 - 서버가 자동으로 UUID 기반 랜덤 키 생성
 - 생성된 키가 로그에 출력됨
 - 서버 재시작 시 키가 변경됨

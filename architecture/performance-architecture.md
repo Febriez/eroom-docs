@@ -16,14 +16,14 @@
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">📊 Claude 3.5 Sonnet 벤치마크</h4>
 
-| 모델 정보                | 값                          | 설명                   |
-|----------------------|----------------------------|----------------------|
-| **모델명**              | claude-3-5-sonnet-20241022 | 최신 Claude 3.5 Sonnet |
-| **최대 토큰**            | 16,000                     | 충분한 출력 용량            |
-| **시나리오 Temperature** | 0.9                        | 높은 창의성               |
-| **스크립트 Temperature** | 0.1                        | 높은 정확성               |
-| **응답 시간**            | 1-3초                       | 빠른 처리 속도             |
-| **정확도**              | 98%+                       | 높은 품질 보장             |
+| 모델 정보 | 값 | 설명 |
+|-----------|-----|------|
+| **모델명** | claude-3-5-sonnet-20241022 | 최신 Claude 3.5 Sonnet |
+| **최대 토큰** | 16,000 | 충분한 출력 용량 |
+| **시나리오 Temperature** | 0.9 | 높은 창의성 |
+| **스크립트 Temperature** | 0.1 | 높은 정확성 |
+| **응답 시간** | 1-3초 | 빠른 처리 속도 |
+| **정확도** | 98%+ | 높은 품질 보장 |
 
 </div>
 
@@ -166,7 +166,6 @@ A --> E[간단한 API]
     C --> G[비용 효율적]
     D --> H[빠른 시작]
     E --> I[유지보수 용이]
-
 {% endmermaid %}
 
 ---
@@ -253,7 +252,6 @@ axisFormat %M:%S
     
     section 최종
     결과 통합         :done, final, after ai2, 10s
-
 {% endmermaid %}
 
   <div style="margin-top: 15px;">
@@ -295,13 +293,13 @@ axisFormat %M:%S
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">💡 압축된 프롬프트 성능</h4>
 
-| 지표          | 기존     | 최적화 후  | 개선율  |
-|-------------|--------|--------|------|
-| **프롬프트 길이** | 1,500자 | 800자   | -47% |
-| **입력 토큰**   | 2,000개 | 1,100개 | -45% |
-| **처리 시간**   | 90초    | 60초    | -33% |
-| **정확도**     | 95%    | 98%+   | +3%  |
-| **파싱 성공률**  | 92%    | 99%+   | +7%  |
+| 지표 | 기존 | 최적화 후 | 개선율 |
+|------|------|-----------|--------|
+| **프롬프트 길이** | 1,500자 | 800자 | -47% |
+| **입력 토큰** | 2,000개 | 1,100개 | -45% |
+| **처리 시간** | 90초 | 60초 | -33% |
+| **정확도** | 95% | 98%+ | +3% |
+| **파싱 성공률** | 92% | 99%+ | +7% |
 
 </div>
 
@@ -309,15 +307,15 @@ axisFormat %M:%S
 
 ```java
 // 최적화된 병렬 처리
-CompletableFuture<JsonObject> scenarioFuture =
-        CompletableFuture.supplyAsync(() -> generateScenario()); // 60초
+CompletableFuture<JsonObject> scenarioFuture = 
+    CompletableFuture.supplyAsync(() -> generateScenario()); // 60초
 
-CompletableFuture<List<ModelResult>> modelFutures =
-        CompletableFuture.supplyAsync(() -> generateModels()); // 5-8분 (병렬)
+CompletableFuture<List<ModelResult>> modelFutures = 
+    CompletableFuture.supplyAsync(() -> generateModels()); // 5-8분 (병렬)
 
-CompletableFuture<Map<String, String>> scriptFuture =
-        scenarioFuture.thenCompose(scenario ->
-                CompletableFuture.supplyAsync(() -> generateScripts(scenario))); // 20초
+CompletableFuture<Map<String, String>> scriptFuture = 
+    scenarioFuture.thenCompose(scenario -> 
+        CompletableFuture.supplyAsync(() -> generateScripts(scenario))); // 20초
 ```
 
 ### 성능 개선 포인트
@@ -351,12 +349,12 @@ CompletableFuture<Map<String, String>> scriptFuture =
 
 ### 최적화 후 비용 구조
 
-| 구성 요소           | 기존 비용       | 최적화 후       | 절약률      |
-|-----------------|-------------|-------------|----------|
-| Claude API (토큰) | $0.03/요청    | $0.015/요청   | -50%     |
-| 처리 시간 (서버)      | $0.05/요청    | $0.035/요청   | -30%     |
-| Meshy API       | $0.20/모델    | $0.20/모델    | 0%       |
-| **총 비용**        | **$0.48/룸** | **$0.35/룸** | **-27%** |
+| 구성 요소 | 기존 비용 | 최적화 후 | 절약률 |
+|-----------|-----------|-----------|---------|
+| Claude API (토큰) | $0.03/요청 | $0.015/요청 | -50% |
+| 처리 시간 (서버) | $0.05/요청 | $0.035/요청 | -30% |
+| Meshy API | $0.20/모델 | $0.20/모델 | 0% |
+| **총 비용** | **$0.48/룸** | **$0.35/룸** | **-27%** |
 
 ### 월간 운영 비용 (1,500 룸 기준)
 

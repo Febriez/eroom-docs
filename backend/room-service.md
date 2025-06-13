@@ -29,7 +29,6 @@ end
     style C fill:#4a90e2
     style D fill:#e74c3c
     style E fill:#4a90e2
-
 {% endmermaid %}
 
 ---
@@ -89,9 +88,9 @@ public class RoomServiceImpl implements RoomService, AutoCloseable {
 | 필드            | 검증 내용            | 실패 시 동작                  | 에러 메시지                                                    |
 |---------------|------------------|--------------------------|-----------------------------------------------------------|
 | `uuid`        | 비어있지 않음, 공백 제거   | IllegalArgumentException | "UUID가 비어있습니다"                                            |
-| `theme`       | 비어있지 않음, 최대 100자 | IllegalArgumentException | "테마가 비어있습니다"                                              |
+| `theme`       | 비어있지 않음          | IllegalArgumentException | "테마가 비어있습니다"                                              |
 | `keywords`    | 최소 1개, 각각 유효     | IllegalArgumentException | "키워드가 비어있습니다" / "빈 키워드가 포함되어 있습니다"                        |
-| `difficulty`  | easy/normal/hard | 기본값 "normal"             | "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요."         |
+| `difficulty`  | easy/normal/hard | 기본값 "normal"            | "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요."         |
 | `room_prefab` | https:// URL     | IllegalArgumentException | "roomPrefab URL이 비어있습니다" / "유효하지 않은 roomPrefab URL 형식입니다" |
 
 ```java
@@ -193,7 +192,6 @@ B --> C[병렬 생성 시작]
     F --> G{결과 수집}
     G -->|성공| H[tracking에 추가]
     G -->|실패| I[failed_models에 추가]
-
 {% endmermaid %}
 
 **모델 건너뛰기 조건:**
@@ -222,6 +220,9 @@ B --> C[병렬 생성 시작]
 - `error-refine-{ID}`: 정제 실패
 - `error-exception-{UUID}`: 예외 발생
 - `error-general-{UUID}`: 일반 오류
+- `no-tracking-{timestamp}`: 추적 ID 없음
+- `timeout-{timestamp}`: 타임아웃
+- `collection_error-{timestamp}`: 수집 오류
   {% endhint %}
 
 ### 4️⃣ **스크립트 생성 (Script Generation)**
@@ -244,8 +245,9 @@ private JsonObject buildScriptRequest(JsonObject scenario, String roomPrefabUrl)
 
 **스크립트 특징:**
 
-- Unity6 최신 API 사용
-- InputSystem 통합
+- Unity6 최신 API 사용 (Input System 필수)
+- Raycast 기반 마우스 입력 (OnMouseDown 금지)
+- GameManager 중앙 집중식 선택 관리
 - 에러 처리 포함
 - 한국어 디버그 메시지
 - Base64 인코딩으로 전송
@@ -354,7 +356,6 @@ public JsonObject createRoom(@NotNull RoomCreationRequest request, String ruid) 
 ### ExecutorService 관리
 
 ```java
-
 @Override
 public void close() {
     log.info("RoomService 종료 시작");
@@ -402,59 +403,29 @@ public void close() {
 ```java
 // INFO: 주요 단계 시작/완료
 log.info("통합 방 생성 시작: ruid={}, user_uuid={}, theme={}, difficulty={}",
-         ruid, request.getUuid(),request.
-
-getTheme(),request.
-
-getValidatedDifficulty());
-        log.
-
-info("통합 시나리오 생성 완료. ruid: {}, 오브젝트 설명 {}개",
-     ruid, objectInstructions.size());
-        log.
-
-info("통합 스크립트 생성 완료: {} 개",allScripts.size());
-        log.
-
-info("통합 방 생성 완료: ruid={}, 스크립트 수={}",ruid, allScripts.size());
+         ruid, request.getUuid(), request.getTheme(), request.getValidatedDifficulty());
+log.info("통합 시나리오 생성 완료. ruid: {}, 오브젝트 설명 {}개",
+         ruid, objectInstructions.size());
+log.info("통합 스크립트 생성 완료: {} 개", allScripts.size());
+log.info("통합 방 생성 완료: ruid={}, 스크립트 수={}", ruid, allScripts.size());
 
 // DEBUG: 상세 진행 상황
-        log.
-
-debug("3D 모델 생성 요청 [{}]: name='{}', prompt='{}자'",
-      index, name, prompt.length());
-        log.
-
-debug("모델 추적 ID 추가: {} -> {}",objectName, trackingId);
-log.
-
-debug("스크립트 객체 생성 완료: {} 개의 스크립트",scripts.size());
+log.debug("3D 모델 생성 요청 [{}]: name='{}', prompt='{}자'",
+          index, name, prompt.length());
+log.debug("모델 추적 ID 추가: {} -> {}", objectName, trackingId);
+log.debug("스크립트 객체 생성 완료: {} 개의 스크립트", scripts.size());
 
 // WARN: 부분 실패 (계속 진행)
-        log.
-
-warn("object_instructions[{}]에 필수 필드가 없습니다. 건너뜁니다.",i);
-log.
-
-warn("모델 생성 타임아웃 발생, 현재까지 완료된 결과만 수집");
-log.
-
-warn("GameManager 스크립트가 파싱되지 않았습니다");
-log.
-
-warn("유효하지 않은 스크립트 엔트리: name={}, contentEmpty={}",
-     scriptName, base64Content ==null||base64Content.isEmpty());
+log.warn("object_instructions[{}]에 필수 필드가 없습니다. 건너뜁니다.", i);
+log.warn("모델 생성 타임아웃 발생, 현재까지 완료된 결과만 수집");
+log.warn("GameManager 스크립트가 파싱되지 않았습니다");
+log.warn("유효하지 않은 스크립트 엔트리: name={}, contentEmpty={}",
+         scriptName, base64Content == null || base64Content.isEmpty());
 
 // ERROR: 치명적 오류
-        log.
-
-error("통합 방 생성 중 시스템 오류 발생: ruid={}",ruid, e);
-log.
-
-error("모델 생성 실패: {} - {}",name, e.getMessage());
-        log.
-
-error("모델 결과 수집 실패: index={}",i, e);
+log.error("통합 방 생성 중 시스템 오류 발생: ruid={}", ruid, e);
+log.error("모델 생성 실패: {} - {}", name, e.getMessage());
+log.error("모델 결과 수집 실패: index={}", i, e);
 ```
 
 {% endhint %}
@@ -529,7 +500,7 @@ private boolean isValidScriptEntry(String name, String content) {
 ### 모델 추적 결과 처리
 
 ```java
-private void addTrackingResult(JsonObject tracking, JsonObject failedModels,
+private void addTrackingResult(JsonObject tracking, JsonObject failedModels, 
                                ModelGenerationResult result) {
     if (result == null) {
         log.warn("모델 결과가 null입니다");
@@ -569,7 +540,6 @@ private void addTrackingResult(JsonObject tracking, JsonObject failedModels,
 ### buildFinalResponse 구현
 
 ```java
-
 @NotNull
 private JsonObject buildFinalResponse(@NotNull RoomCreationRequest request, String ruid,
                                       JsonObject scenario, Map<String, String> allScripts,
@@ -671,13 +641,13 @@ private JsonObject buildFinalResponse(@NotNull RoomCreationRequest request, Stri
 ### 성능 메트릭 수집
 
 ```java
-private void logPerformanceMetrics(String ruid, long startTime,
+private void logPerformanceMetrics(String ruid, long startTime, 
                                    int modelCount, int scriptCount) {
     long duration = System.currentTimeMillis() - startTime;
-
-    log.info("성능 메트릭 - ruid: {}, 총 시간: {}ms, 모델 수: {}, 스크립트 수: {}",
+    
+    log.info("성능 메트릭 - ruid: {}, 총 시간: {}ms, 모델 수: {}, 스크립트 수: {}", 
             ruid, duration, modelCount, scriptCount);
-
+    
     // 평균 처리 시간 계산
     if (duration > 600000) { // 10분 초과
         log.warn("처리 시간 초과 - ruid: {}, 시간: {}분", ruid, duration / 60000);
@@ -691,13 +661,9 @@ private void logPerformanceMetrics(String ruid, long startTime,
 private static final boolean DEBUG_MODE =
         Boolean.parseBoolean(System.getProperty("eroom.debug", "false"));
 
-if(DEBUG_MODE){
-        log.
-
-debug("시나리오 전체 내용: {}",scenario.toString());
-        log.
-
-debug("스크립트 목록: {}",allScripts.keySet());
+if (DEBUG_MODE) {
+        log.debug("시나리오 전체 내용: {}", scenario.toString());
+        log.debug("스크립트 목록: {}", allScripts.keySet());
         }
 ```
 

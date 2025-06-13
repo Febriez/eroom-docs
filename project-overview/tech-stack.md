@@ -29,7 +29,7 @@ OK[OkHttp Client]
 end
 
 subgraph "AI Services"
-CL[Claude AI - Anthropic]
+CL[Claude Sonnet 4 - Anthropic]
 ME[Meshy AI - 3D Generation]
 end
 
@@ -149,7 +149,7 @@ style FB fill:#f39c12
 **API 특성:**
 
 - 폴링 간격: 3초
-- 최대 폴링 횟수: 200회 (10분)
+- 최대 폴링 횟수: 100회 (5분)
 - API 키: 3개 로드밸런싱
 - 성공률: 95%+
   {% endhint %}
@@ -160,13 +160,18 @@ style FB fill:#f39c12
 
 ### **Unity6**
 
-| 기능                   | 활용                |
-|----------------------|-------------------|
-| **최신 렌더링**           | URP/HDRP로 고품질 그래픽 |
-| **새로운 Input System** | 다양한 입력 장치 지원      |
-| **UI Toolkit**       | 현대적인 UI 구현        |
-| **C# 9.0**           | 최신 언어 기능 활용       |
-| **Addressables**     | 효율적인 에셋 관리        |
+| 기능                   | 활용                      |
+|----------------------|-----------------------|
+| **최신 렌더링**           | URP/HDRP로 고품질 그래픽       |
+| **새로운 Input System** | Raycast 기반 마우스 입력 필수    |
+| **UI Toolkit**       | 현대적인 UI 구현              |
+| **C# 9.0**           | 최신 언어 기능 활용             |
+| **Addressables**     | 효율적인 에셋 관리              |
+
+**중요 변경사항:**
+- OnMouseDown/OnMouseUp 사용 금지
+- Input System API 필수 사용
+- GameManager 중앙 집중식 선택 관리
 
 ---
 
@@ -227,7 +232,7 @@ style FB fill:#f39c12
 sequenceDiagram
 participant C as Client
 participant S as Server
-participant CL as Claude AI
+participant CL as Claude Sonnet 4
 participant ME as Meshy AI
 participant FB as Firebase
 
@@ -250,7 +255,6 @@ participant FB as Firebase
 
     C->>S: GET /room/result
     S-->>C: Complete Data
-
 {% endmermaid %}
 
 ---

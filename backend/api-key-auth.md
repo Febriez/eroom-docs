@@ -32,7 +32,6 @@ V -->|No| E[401 Unauthorized]
     style F fill:#e74c3c
     style AC fill:#3498db
     style E fill:#e74c3c
-
 {% endmermaid %}
 
 ---
@@ -44,8 +43,7 @@ V -->|No| E[401 Unauthorized]
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔑 API Key 생성 전략</h4>
 
-  ```java
-
+```java
 @Slf4j
 public class EnvironmentAuthProvider implements AuthProvider {
     private static final String EROOM_PRIVATE_KEY = System.getenv("EROOM_PRIVATE_KEY");
@@ -71,7 +69,7 @@ public class EnvironmentAuthProvider implements AuthProvider {
         }
     }
 }
-  ```
+```
 
 **특징:**
 
@@ -91,8 +89,8 @@ public class EnvironmentAuthProvider implements AuthProvider {
 <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">🔍 요청 검증 프로세스</h4>
 
-  ```java
-  public class ApiKeyAuthFilter implements HttpHandler {
+```java
+public class ApiKeyAuthFilter implements HttpHandler {
     private static final Logger log = LoggerFactory.getLogger(ApiKeyAuthFilter.class);
     private static final String AUTH_HEADER = "Authorization";
     private final String validApiKey;
@@ -124,7 +122,7 @@ public class EnvironmentAuthProvider implements AuthProvider {
         next.handleRequest(exchange);
     }
 }
-  ```
+```
 
 **검증 단계:**
 
@@ -178,7 +176,6 @@ participant Service
     Handler->>Service: Process
     Service-->>Handler: Result
     Handler-->>Client: 200 Response
-
 {% endmermaid %}
 
 ### 인증 실패
@@ -192,7 +189,6 @@ participant Filter
     Filter->>Filter: Validate Key
     Filter-->>Client: 401 Unauthorized
     Note over Client: Request Rejected
-
 {% endmermaid %}
 
 ---
@@ -205,7 +201,7 @@ participant Filter
   <h4 style="margin: 0 0 15px 0;">🛡️ 보안 권장사항</h4>
 
 | 항목         | 권장사항               | 이유          |
-  |------------|--------------------|-------------|
+|------------|--------------------|-------------|
 | **키 생성**   | 강력한 랜덤 값 사용 (UUID) | 예측 불가능성     |
 | **키 저장**   | 환경 변수 사용           | 코드 분리       |
 | **키 전송**   | HTTPS 필수 (프로덕션)    | 중간자 공격 방지   |
@@ -262,14 +258,13 @@ EROOM_PRIVATE_KEY=your-secure-api-key-here
 
 ```java
 // UndertowServer.java에서
-HttpHandler apiKeyProtectedHandler =
-        new ApiKeyAuthFilter(routingHandler, authProvider.getApiKey());
+HttpHandler apiKeyProtectedHandler = 
+    new ApiKeyAuthFilter(routingHandler, authProvider.getApiKey());
 
-server = Undertow.
-builder().
-addHttpListener(port, "0.0.0.0").
-setHandler(apiKeyProtectedHandler).  // 모든 요청이 필터 통과
-build();
+server = Undertow.builder()
+    .addHttpListener(port, "0.0.0.0")
+    .setHandler(apiKeyProtectedHandler)  // 모든 요청이 필터 통과
+    .build();
 ```
 
 ### 로깅 전략
@@ -277,21 +272,19 @@ build();
 <div style="background: #f0f0f0; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">📝 로그 레벨별 기록</h4>
 
-  ```java
-  // INFO: 정상 동작
-  log.info("ApiKeyAuthFilter가 초기화되었습니다. API 키가 설정되었습니다.");
+```java
+// INFO: 정상 동작
+log.info("ApiKeyAuthFilter가 초기화되었습니다. API 키가 설정되었습니다.");
+log.info("EROOM_PRIVATE_KEY 환경 변수가 설정되었습니다.");
 
 // WARN: 인증 실패 (보안 이벤트)
-  log.
-
-warn("Authorization 헤더가 요청에 없습니다: {}",exchange.getRequestPath());
-        log.
-
-warn("잘못된 API 키가 제공되었습니다: {}",exchange.getRequestPath());
+log.warn("Authorization 헤더가 요청에 없습니다: {}", exchange.getRequestPath());
+log.warn("잘못된 API 키가 제공되었습니다: {}", exchange.getRequestPath());
+log.warn("EROOM_PRIVATE_KEY 환경 변수가 설정되지 않았습니다. 보안을 위해 랜덤 키가 생성되었습니다.");
 
 // 키 값은 로그에 기록하지 않음 (보안)
 // 경로만 기록하여 문제 추적 가능
-  ```
+```
 
 </div>
 
@@ -305,24 +298,24 @@ warn("잘못된 API 키가 제공되었습니다: {}",exchange.getRequestPath())
   <h4 style="margin: 0 0 15px 0;">🔮 가능한 확장</h4>
 
 1. **다중 API Key 지원**
-    - 클라이언트별 다른 키
-    - 권한 레벨 구분
-    - 키별 사용량 추적
+   - 클라이언트별 다른 키
+   - 권한 레벨 구분
+   - 키별 사용량 추적
 
 2. **JWT 토큰 방식**
-    - 상태 없는(Stateless) 인증
-    - 토큰 만료 시간
-    - 리프레시 토큰
+   - 상태 없는(Stateless) 인증
+   - 토큰 만료 시간
+   - 리프레시 토큰
 
 3. **Rate Limiting**
-    - API Key별 요청 제한
-    - DDoS 방어
-    - 사용량 할당
+   - API Key별 요청 제한
+   - DDoS 방어
+   - 사용량 할당
 
 4. **OAuth 2.0**
-    - 표준 프로토콜
-    - 제3자 인증
-    - 소셜 로그인
+   - 표준 프로토콜
+   - 제3자 인증
+   - 소셜 로그인
 
 </div>
 

@@ -71,7 +71,6 @@ H --> I[URL 반환]
     style E fill:#4a90e2
     style I fill:#4caf50
     style J fill:#e74c3c
-
 {% endmermaid %}
 
 ---
@@ -84,7 +83,6 @@ H --> I[URL 반환]
   <h4 style="margin: 0 0 15px 0;">🖼️ 빠른 프리뷰 모델</h4>
 
 ```java
-
 @Nullable
 private String createPreview(String prompt, String apiKey) {
     try {
@@ -180,7 +178,6 @@ private boolean isTaskFailed(String taskId, String apiKey) {
   <h4 style="margin: 0 0 15px 0;">💎 고품질 최종 모델</h4>
 
 ```java
-
 @Nullable
 private String refineModel(String previewId, String apiKey) {
     try {
@@ -248,9 +245,7 @@ public String getMeshyKey(int index) {
 ```java
 // 오브젝트 인덱스 기반 키 선택
 String apiKey = apiKeyProvider.getMeshyKey(keyIndex);
-log.
-
-info("{}의 모델 생성 시작, 키 인덱스: {}",objectName, keyIndex);
+log.info("{}의 모델 생성 시작, 키 인덱스: {}", objectName, keyIndex);
 ```
 
 </div>
@@ -287,7 +282,6 @@ info("{}의 모델 생성 시작, 키 인덱스: {}",objectName, keyIndex);
   <h4 style="margin: 0 0 15px 0;">⚠️ 에러 ID 체계</h4>
 
 ```java
-
 @Override
 public String generateModel(String prompt, String objectName, int keyIndex) {
     try {
@@ -342,7 +336,6 @@ private String processModelGeneration(String prompt, String objectName, String a
 ### HTTP 클라이언트 설정
 
 ```java
-
 @NotNull
 @Contract(" -> new")
 private OkHttpClient createHttpClient() {
@@ -412,7 +405,7 @@ private OkHttpClient createHttpClient() {
       <li>3개 API 키 로드밸런싱</li>
       <li>병렬 모델 생성</li>
       <li>효율적 폴링 (3초)</li>
-      <li>타임아웃 관리 (10분)</li>
+      <li>타임아웃 관리 (5분)</li>
     </ul>
   </div>
   <div style="background: #e8f5e9; padding: 20px; border-radius: 10px;">
@@ -433,7 +426,6 @@ private OkHttpClient createHttpClient() {
 ### 전체 처리 흐름
 
 ```java
-
 @NotNull
 private String refineModelAfterPreview(String previewId, String objectName, String apiKey) {
     try {

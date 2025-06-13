@@ -15,19 +15,19 @@
 
 ```java
 public class UndertowServer implements Server {
-    private static final Logger log = LoggerFactory.getLogger(UndertowServer.class);
-    private static final int MAX_CONCURRENT_REQUESTS = 1;
+   private static final Logger log = LoggerFactory.getLogger(UndertowServer.class);
+   private static final int MAX_CONCURRENT_REQUESTS = 1;
 
-    private final Undertow server;
-    private final QueueManager queueManager;
-    private final RoomService roomService;
+   private final Undertow server;
+   private final QueueManager queueManager;
+   private final RoomService roomService;
 
-    public UndertowServer(int port) {
-        // 의존성 초기화
-        // 서비스 생성
-        // 라우팅 설정
-        // 서버 빌드
-    }
+   public UndertowServer(int port) {
+      // 의존성 초기화
+      // 서비스 생성
+      // 라우팅 설정
+      // 서버 빌드
+   }
 }
 ```
 
@@ -57,16 +57,16 @@ public class UndertowServer implements Server {
 
 ```java
 public class RoomRequestQueueManager implements QueueManager {
-    private final BlockingQueue<QueuedRoomRequest> requestQueue;
-    private final ExecutorService executorService;
-    private final int maxConcurrentRequests;
+   private final BlockingQueue<QueuedRoomRequest> requestQueue;
+   private final ExecutorService executorService;
+   private final int maxConcurrentRequests;
 
-    private final AtomicInteger activeRequests = new AtomicInteger(0);
-    private final AtomicInteger completedRequests = new AtomicInteger(0);
+   private final AtomicInteger activeRequests = new AtomicInteger(0);
+   private final AtomicInteger completedRequests = new AtomicInteger(0);
 
-    // 동시 처리: 기본 1개 (확장 가능)
-    // 큐 타입: LinkedBlockingQueue (무제한)
-    // 워커 스레드: maxConcurrentRequests 개수만큼
+   // 동시 처리: 기본 1개 (확장 가능)
+   // 큐 타입: LinkedBlockingQueue (무제한)
+   // 워커 스레드: maxConcurrentRequests 개수만큼
 }
 ```
 
@@ -77,6 +77,7 @@ public class RoomRequestQueueManager implements QueueManager {
 - ✅ 상태 추적 (QUEUED → PROCESSING → COMPLETED/FAILED)
 - ✅ 동시 처리량 제어
 - ✅ 통계 수집 (대기/활성/완료)
+- ✅ 상세한 요청 로깅
 
 </div>
 
@@ -96,7 +97,6 @@ participant AI Services
     Worker->>AI Services: process
     AI Services-->>Worker: result
     Worker->>JobResultStore: store result
-
 {% endmermaid %}
 
 ---
@@ -145,7 +145,7 @@ public class JobResultStore {
 | 변수명               | 용도           | 기본값             |
 |-------------------|--------------|-----------------|
 | EROOM_PRIVATE_KEY | API 인증 키     | 랜덤 UUID (자동 생성) |
-| ANTHROPIC_KEY     | Claude API 키 | 필수 (없으면 로그 경고)  |
+| ANTHROPIC_KEY     | Claude API 키 | 필수 (없으면 서버 종료)  |
 | MESHY_KEY_1/2/3   | Meshy API 키  | 필수 (최소 1개)      |
 
 **💡 보안 팁:**
@@ -166,6 +166,11 @@ JsonObject config = configManager.getConfig();
 String scenarioPrompt = configManager.getPrompt("scenario");
 JsonObject modelConfig = configManager.getModelConfig();
 ```
+
+**config.json 주요 설정:**
+- 모델명: claude-sonnet-4-20250514
+- 최대 토큰: 16,000
+- Temperature: 시나리오 0.9, 스크립트 0.1
 
 ---
 
@@ -206,21 +211,21 @@ private RoutingHandler createRouting(RequestHandler handler) {
   <h4 style="margin: 0 0 15px 0;">서버 초기화 순서</h4>
 
 1. **의존성 초기화**
-    - Gson 인스턴스 생성
-    - ConfigurationManager 로드
-    - ApiKeyProvider (환경변수)
-    - AuthProvider (API 키)
+   - Gson 인스턴스 생성
+   - ConfigurationManager 로드
+   - ApiKeyProvider (환경변수)
+   - AuthProvider (API 키)
 
 2. **서비스 생성**
-    - ServiceFactory 통한 서비스 인스턴스화
-    - RoomService (AI 서비스 포함)
-    - JobResultStore
-    - QueueManager
+   - ServiceFactory 통한 서비스 인스턴스화
+   - RoomService (AI 서비스 포함)
+   - JobResultStore
+   - QueueManager
 
 3. **라우팅 설정**
-    - API 핸들러 생성
-    - 라우트 정의
-    - 인증 필터 적용
+   - API 핸들러 생성
+   - 라우트 정의
+   - 인증 필터 적용
 
 4. **서버 빌드 및 시작**
    ```java
@@ -239,7 +244,6 @@ private RoutingHandler createRouting(RequestHandler handler) {
   <h4 style="margin: 0 0 15px 0;">우아한 종료 절차</h4>
 
 ```java
-
 @Override
 public void stop() {
     if (server != null) {
@@ -328,13 +332,9 @@ D -->|5-8분| E[완료]
   "status": "healthy",
   "queue": {
     "queued": 5,
-    // 대기 중
     "active": 1,
-    // 처리 중
     "completed": 142,
-    // 완료됨
     "maxConcurrent": 1
-    // 최대 동시 처리
   }
 }
 ```
@@ -348,6 +348,18 @@ D -->|5-8분| E[완료]
 | **ERROR** | 오류 발생  | 처리 실패        |
 | **DEBUG** | 상세 디버깅 | 요청/응답 세부사항   |
 
+**상세 로깅 예시:**
+```
+=== 요청 제출 상세 정보 ===
+RUID: room_a1b2c3d4e5f6
+User UUID: test_user
+Theme: '우주 정거장'
+Keywords: SF, 퍼즐
+Difficulty: 'normal'
+Room Prefab: 'https://example.com/space.fbx'
+========================
+```
+
 ---
 
 ## 🏛️ 아키텍처 특징
@@ -357,9 +369,7 @@ D -->|5-8분| E[완료]
 ```java
 // ServiceFactory를 통한 깔끔한 의존성 관리
 ServiceFactory serviceFactory = new ServiceFactoryImpl(apiKeyProvider, configManager);
-roomService =serviceFactory.
-
-createRoomService();
+roomService = serviceFactory.createRoomService();
 ```
 
 ### 비동기 처리 모델
@@ -398,12 +408,12 @@ java -Xms512m -Xmx2g \
    ```
 
 2. **연결 풀 최적화**
-    - OkHttpClient 연결 풀 크기 조정
-    - 타임아웃 값 최적화
+   - OkHttpClient 연결 풀 크기 조정
+   - 타임아웃 값 최적화
 
 3. **로깅 레벨 조정**
-    - 프로덕션: INFO 레벨
-    - 디버깅: DEBUG 레벨
+   - 프로덕션: INFO 레벨
+   - 디버깅: DEBUG 레벨
 
 ---
 

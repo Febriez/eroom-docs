@@ -64,7 +64,6 @@ end
     style AS fill:#4a90e2
     style MS fill:#4a90e2
     style FB fill:#f39c12
-
 {% endmermaid %}
 
 ---
@@ -75,7 +74,7 @@ end
 
 | 클라이언트         | 역할          | 기술 스택             |
 |---------------|-------------|-------------------|
-| Unity Client  | 메인 게임 클라이언트 | Unity6, C#        |
+| Unity Client  | 메인 게임 클라이언트 | Unity6, C#, Input System |
 | Web Client    | 웹 기반 대시보드   | React, TypeScript |
 | Mobile Client | 모바일 컨트롤러    | React Native      |
 
@@ -114,7 +113,7 @@ end
 
 > * 시나리오 생성 (60초)
 > * 스크립트 생성 (20초)
-> * Claude Sonnet 4 모델 사용
+> * Claude Sonnet 4 (claude-sonnet-4-20250514) 모델 사용
 > * Temperature: 시나리오 0.9, 스크립트 0.1
 
 #### 🎨 **Meshy Service**
@@ -193,7 +192,6 @@ B -->|No| D[401 Unauthorized]
     
     style D fill:#f44336
     style C fill:#4caf50
-
 {% endmermaid %}
 
 **보안 계층:**
@@ -269,7 +267,6 @@ participant DB as ResultStore
     S->>DB: 결과 조회
     DB-->>S: 완료된 데이터
     S-->>C: 200 OK {전체 결과}
-
 {% endmermaid %}
 
 ---
@@ -303,24 +300,40 @@ participant DB as ResultStore
 
 1. **큐 시스템 확장**
 
-    - Redis 기반 분산 큐로 전환 가능
-    - 다중 워커 프로세스 지원
+   - Redis 기반 분산 큐로 전환 가능
+   - 다중 워커 프로세스 지원
 
 2. **AI 서비스 확장**
 
-    - 새로운 AI 서비스 쉽게 추가
-    - 서비스별 폴백 메커니즘
+   - 새로운 AI 서비스 쉽게 추가
+   - 서비스별 폴백 메커니즘
 
 3. **데이터 저장소 확장**
 
-    - 영구 저장소 추가 (PostgreSQL 등)
-    - 캐싱 레이어 추가 (Redis)
+   - 영구 저장소 추가 (PostgreSQL 등)
+   - 캐싱 레이어 추가 (Redis)
 
 4. **모니터링 확장**
 
-    - Prometheus 메트릭 수집
-    - Grafana 대시보드
-    - ELK 스택 로그 분석
+   - Prometheus 메트릭 수집
+   - Grafana 대시보드
+   - ELK 스택 로그 분석
+
+---
+
+## 🎮 Unity6 통합 특징
+
+### Input System 통합
+
+- **마우스 입력**: Raycast 기반 감지 (OnMouseDown 사용 금지)
+- **키보드 입력**: Input System API 사용
+- **중앙 집중식 선택**: GameManager의 currentSelectedObject 관리
+
+### 스크립트 생성 특징
+
+- **필수 using 문**: UnityEngine, UnityEngine.InputSystem
+- **미니파이드 코드**: 한 줄로 압축된 스크립트
+- **GameManager 우선**: 항상 첫 번째로 생성
 
 ---
 
