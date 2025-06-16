@@ -13,23 +13,23 @@
 
 ### 성공 응답
 
-| 코드 | 상태 | 사용 시나리오 |
-|------|------|---------------|
-| **200** | OK | 정상적인 GET 요청 완료 |
+| 코드      | 상태       | 사용 시나리오             |
+|---------|----------|---------------------|
+| **200** | OK       | 정상적인 GET 요청 완료      |
 | **202** | Accepted | 비동기 작업 시작 (룸 생성 요청) |
 
 ### 클라이언트 에러 (4xx)
 
-| 코드 | 상태 | 사용 시나리오 |
-|------|------|---------------|
-| **400** | Bad Request | 잘못된 요청 형식, 필수 파라미터 누락 |
-| **401** | Unauthorized | API 키 인증 실패 |
-| **404** | Not Found | 존재하지 않는 리소스 (ruid) |
+| 코드      | 상태           | 사용 시나리오               |
+|---------|--------------|-----------------------|
+| **400** | Bad Request  | 잘못된 요청 형식, 필수 파라미터 누락 |
+| **401** | Unauthorized | API 키 인증 실패           |
+| **404** | Not Found    | 존재하지 않는 리소스 (ruid)    |
 
 ### 서버 에러 (5xx)
 
-| 코드 | 상태 | 사용 시나리오 |
-|------|------|---------------|
+| 코드      | 상태                    | 사용 시나리오      |
+|---------|-----------------------|--------------|
 | **500** | Internal Server Error | 예상치 못한 서버 오류 |
 
 ---
@@ -48,11 +48,11 @@
 
 ### 필드 설명
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `success` | Boolean | 항상 false |
-| `error` | String | 사람이 읽을 수 있는 에러 메시지 |
-| `timestamp` | String | 에러 발생 시각 (Unix timestamp) |
+| 필드          | 타입      | 설명                        |
+|-------------|---------|---------------------------|
+| `success`   | Boolean | 항상 false                  |
+| `error`     | String  | 사람이 읽을 수 있는 에러 메시지        |
+| `timestamp` | String  | 에러 발생 시각 (Unix timestamp) |
 
 ---
 
@@ -185,21 +185,21 @@
 
 ### 비즈니스 로직 에러
 
-| 에러 메시지 | 원인 | 해결 방법 |
-|-------------|------|-----------|
-| "UUID가 비어있습니다" | uuid 필드 누락/공백 | uuid 값 제공 |
-| "테마가 비어있습니다" | theme 필드 누락/공백 | theme 값 제공 |
-| "키워드가 비어있습니다" | keywords 배열 비어있음 | 최소 1개 키워드 추가 |
-| "유효하지 않은 난이도" | 잘못된 difficulty 값 | easy/normal/hard 중 선택 |
+| 에러 메시지         | 원인               | 해결 방법                 |
+|----------------|------------------|-----------------------|
+| "UUID가 비어있습니다" | uuid 필드 누락/공백    | uuid 값 제공             |
+| "테마가 비어있습니다"   | theme 필드 누락/공백   | theme 값 제공            |
+| "키워드가 비어있습니다"  | keywords 배열 비어있음 | 최소 1개 키워드 추가          |
+| "유효하지 않은 난이도"  | 잘못된 difficulty 값 | easy/normal/hard 중 선택 |
 
 ### 시스템 에러
 
-| 에러 유형 | 예상 메시지 | 서버 동작 |
-|-----------|-------------|-----------|
-| API 키 누락 | "Anthropic API 키가 설정되지 않았습니다" | 서버 종료 |
-| 설정 오류 | "프롬프트 설정을 찾을 수 없습니다" | 서버 종료 |
-| AI 응답 없음 | "시나리오 생성 응답이 비어있습니다" | 서버 종료 |
-| JSON 파싱 실패 | "JSON 파싱 실패" | 서버 종료 |
+| 에러 유형      | 예상 메시지                        | 서버 동작 |
+|------------|-------------------------------|-------|
+| API 키 누락   | "Anthropic API 키가 설정되지 않았습니다" | 서버 종료 |
+| 설정 오류      | "프롬프트 설정을 찾을 수 없습니다"          | 서버 종료 |
+| AI 응답 없음   | "시나리오 생성 응답이 비어있습니다"          | 서버 종료 |
+| JSON 파싱 실패 | "JSON 파싱 실패"                  | 서버 종료 |
 
 ---
 
@@ -262,56 +262,6 @@ void HandleBadRequest(string error)
 }
 ```
 
-### JavaScript 에러 처리
-
-```javascript
-async function handleApiCall(url, options) {
-  try {
-    const response = await fetch(url, options);
-    
-    if (!response.ok) {
-      const error = await response.json();
-      
-      switch (response.status) {
-        case 400:
-          throw new BadRequestError(error.error);
-        case 401:
-          throw new UnauthorizedError('인증이 필요합니다');
-        case 404:
-          throw new NotFoundError(error.error);
-        case 500:
-          throw new ServerError(error.error || '서버 오류');
-        default:
-          throw new ApiError(`Unknown error: ${response.status}`);
-      }
-    }
-    
-    return await response.json();
-    
-  } catch (error) {
-    if (error instanceof ApiError) {
-      handleKnownError(error);
-    } else {
-      handleNetworkError(error);
-    }
-    throw error;
-  }
-}
-
-class ApiError extends Error {
-  constructor(message, statusCode) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
-
-class BadRequestError extends ApiError {
-  constructor(message) {
-    super(message, 400);
-  }
-}
-```
-
 ---
 
 ## 📈 에러 모니터링
@@ -356,42 +306,13 @@ echo "리포트 생성 완료: $OUTPUT"
 
 ### 재시도 가능한 에러
 
-| 에러 | 재시도 권장 | 재시도 전략 |
-|------|--------------|--------------|
-| 500 Server Error | ✅ | 지수 백오프 |
-| 네트워크 타임아웃 | ✅ | 3회까지 |
-| 404 Not Found | ❌ | 재시도 불가 |
-| 401 Unauthorized | ❌ | API 키 확인 필요 |
-| 400 Bad Request | ❌ | 요청 수정 필요 |
-
-### 자동 재시도 구현
-
-```javascript
-async function retryableRequest(fn, maxRetries = 3) {
-  let lastError;
-  
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error;
-      
-      // 재시도 불가능한 에러는 즉시 throw
-      if (error.statusCode === 400 || 
-          error.statusCode === 401 || 
-          error.statusCode === 404) {
-        throw error;
-      }
-      
-      // 지수 백오프
-      const delay = Math.pow(2, i) * 1000;
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-  
-  throw lastError;
-}
-```
+| 에러               | 재시도 권장 | 재시도 전략      |
+|------------------|--------|-------------|
+| 500 Server Error | ✅      | 지수 백오프      |
+| 네트워크 타임아웃        | ✅      | 3회까지        |
+| 404 Not Found    | ❌      | 재시도 불가      |
+| 401 Unauthorized | ❌      | API 키 확인 필요 |
+| 400 Bad Request  | ❌      | 요청 수정 필요    |
 
 ---
 

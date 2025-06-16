@@ -39,11 +39,11 @@ Authorization: your_api_key
 
 ### 응답 필드 설명
 
-| 필드 | 타입 | 설명 |
-|------|------|------|
-| `queued` | Integer | 현재 큐에 대기 중인 요청 수 |
-| `active` | Integer | 현재 처리 중인 요청 수 |
-| `completed` | Integer | 서버 시작 이후 완료된 총 요청 수 |
+| 필드              | 타입      | 설명                         |
+|-----------------|---------|----------------------------|
+| `queued`        | Integer | 현재 큐에 대기 중인 요청 수           |
+| `active`        | Integer | 현재 처리 중인 요청 수              |
+| `completed`     | Integer | 서버 시작 이후 완료된 총 요청 수        |
 | `maxConcurrent` | Integer | 동시에 처리 가능한 최대 요청 수 (현재: 1) |
 
 ### 에러 응답 (401 Unauthorized)
@@ -63,51 +63,6 @@ Authorization: your_api_key
 ```bash
 curl http://localhost:8080/queue/status \
   -H "Authorization: your_api_key"
-```
-
-### 실시간 모니터링 스크립트
-
-```bash
-#!/bin/bash
-# queue-monitor.sh
-
-API_KEY="your_api_key"
-
-while true; do
-  clear
-  echo "=== ERoom Queue Monitor ==="
-  echo "Time: $(date)"
-  echo ""
-  
-  RESPONSE=$(curl -s http://localhost:8080/queue/status \
-    -H "Authorization: $API_KEY")
-  
-  if [ $? -eq 0 ]; then
-    echo $RESPONSE | jq '.'
-    
-    QUEUED=$(echo $RESPONSE | jq '.queued')
-    ACTIVE=$(echo $RESPONSE | jq '.active')
-    
-    # 시각적 표시
-    echo ""
-    echo -n "Queued : "
-    for i in $(seq 1 $QUEUED); do echo -n "⏳"; done
-    echo ""
-    echo -n "Active : "
-    for i in $(seq 1 $ACTIVE); do echo -n "⚙️"; done
-    echo ""
-    
-    # 경고 표시
-    if [ $QUEUED -gt 10 ]; then
-      echo ""
-      echo "⚠️  Warning: High queue load!"
-    fi
-  else
-    echo "❌ Failed to fetch queue status"
-  fi
-  
-  sleep 2
-done
 ```
 
 ### Unity C#에서 모니터링
@@ -177,101 +132,11 @@ public class QueueMonitor : MonoBehaviour
     }
 }
 ```
-
-### JavaScript 대시보드
-
-```javascript
-class QueueMonitor {
-  constructor(apiKey) {
-    this.apiKey = apiKey;
-    this.updateInterval = 2000; // 2초
-  }
-  
-  async start() {
-    setInterval(() => this.updateStatus(), this.updateInterval);
-  }
-  
-  async updateStatus() {
-    try {
-      const response = await fetch('http://localhost:8080/queue/status', {
-        headers: {
-          'Authorization': this.apiKey
-        }
-      });
-      
-      if (response.ok) {
-        const status = await response.json();
-        this.updateDashboard(status);
-      }
-    } catch (error) {
-      console.error('Failed to fetch queue status:', error);
-    }
-  }
-  
-  updateDashboard(status) {
-    // 대시보드 업데이트
-    document.getElementById('queued').textContent = status.queued;
-    document.getElementById('active').textContent = status.active;
-    document.getElementById('completed').textContent = status.completed;
-    
-    // 진행률 표시
-    const queueBar = document.getElementById('queue-bar');
-    queueBar.style.width = `${Math.min(status.queued * 10, 100)}%`;
-    
-    // 경고 표시
-    if (status.queued > 10) {
-      document.getElementById('warning').style.display = 'block';
-    } else {
-      document.getElementById('warning').style.display = 'none';
-    }
-  }
-}
-
-// 사용
-const monitor = new QueueMonitor('your_api_key');
-monitor.start();
-```
-
 ---
 
 ## 활용 시나리오
 
-### 1. 서버 부하 모니터링
-
-```javascript
-// 큐 상태에 따른 요청 제어
-async function shouldSubmitRequest() {
-  const status = await getQueueStatus();
-  
-  // 큐가 너무 많이 쌓였으면 대기
-  if (status.queued > 20) {
-    console.log('Server is busy. Please wait...');
-    return false;
-  }
-  
-  return true;
-}
-```
-
-### 2. 예상 대기 시간 계산
-
-```javascript
-function estimateWaitTime(queueStatus) {
-  const averageProcessingTime = 7; // 분
-  const position = queueStatus.queued + 1;
-  
-  // 동시 처리를 고려한 예상 시간
-  const estimatedMinutes = Math.ceil(position / queueStatus.maxConcurrent) 
-                          * averageProcessingTime;
-  
-  return {
-    minutes: estimatedMinutes,
-    message: `예상 대기 시간: 약 ${estimatedMinutes}분`
-  };
-}
-```
-
-### 3. 서버 상태 표시
+### 서버 상태 표시
 
 ```csharp
 public enum ServerLoad
@@ -293,74 +158,16 @@ ServerLoad GetServerLoad(int queued)
 
 ---
 
-## 모니터링 대시보드 예제
-
-### HTML 구조
-
-```html
-<div class="queue-monitor">
-  <h2>Server Queue Status</h2>
-  
-  <div class="stats">
-    <div class="stat-item">
-      <label>대기 중</label>
-      <span id="queued">0</span>
-    </div>
-    <div class="stat-item">
-      <label>처리 중</label>
-      <span id="active">0</span>
-    </div>
-    <div class="stat-item">
-      <label>완료됨</label>
-      <span id="completed">0</span>
-    </div>
-  </div>
-  
-  <div class="queue-visualization">
-    <div id="queue-bar" class="progress-bar"></div>
-  </div>
-  
-  <div id="warning" class="warning" style="display: none;">
-    ⚠️ 서버가 혼잡합니다. 처리가 지연될 수 있습니다.
-  </div>
-</div>
-```
-
----
-
 ## 성능 고려사항
 
 ### 폴링 주기 권장사항
 
-| 용도 | 권장 주기 | 이유 |
-|------|-----------|------|
-| 실시간 모니터링 | 2-5초 | 빠른 업데이트 |
-| 일반 확인 | 10-30초 | 서버 부하 감소 |
-| 대시보드 표시 | 5-10초 | 균형잡힌 업데이트 |
+| 용도       | 권장 주기  | 이유        |
+|----------|--------|-----------|
+| 실시간 모니터링 | 2-5초   | 빠른 업데이트   |
+| 일반 확인    | 10-30초 | 서버 부하 감소  |
+| 대시보드 표시  | 5-10초  | 균형잡힌 업데이트 |
 
-### 서버 부하 최소화
-
-```javascript
-// 적응형 폴링 주기
-class AdaptiveMonitor {
-  constructor() {
-    this.baseInterval = 5000; // 5초
-    this.currentInterval = this.baseInterval;
-  }
-  
-  adjustInterval(queueStatus) {
-    if (queueStatus.queued > 10) {
-      // 큐가 많을 때는 더 자주 확인
-      this.currentInterval = this.baseInterval / 2;
-    } else if (queueStatus.queued === 0) {
-      // 큐가 비었을 때는 덜 자주 확인
-      this.currentInterval = this.baseInterval * 2;
-    } else {
-      this.currentInterval = this.baseInterval;
-    }
-  }
-}
-```
 
 ---
 
@@ -371,11 +178,11 @@ class AdaptiveMonitor {
 <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin: 20px 0;">
   <h4 style="margin: 0 0 15px 0;">⚙️ 서버 설정</h4>
 
-| 설정 | 값 | 설명 |
-|------|-----|------|
-| `maxConcurrent` | 1 | 동시 처리 제한 |
-| 워커 스레드 | 1 | 큐 처리 스레드 수 |
-| 모델 생성 스레드 | 10 | 3D 모델 병렬 처리 |
+| 설정              | 값  | 설명          |
+|-----------------|----|-------------|
+| `maxConcurrent` | 1  | 동시 처 리 제한   |
+| 워커 스레드          | 1  | 큐 처리 스레드 수  |
+| 모델 생성 스레드       | 10 | 3D 모델 병렬 처리 |
 
 현재 서버는 **한 번에 하나의 룸만** 처리하도록 설정되어 있습니다.
 이는 AI API의 안정성과 비용 최적화를 위한 설계입니다.
@@ -385,12 +192,12 @@ class AdaptiveMonitor {
 
 ## 문제 해결
 
-| 증상 | 가능한 원인 | 해결 방법 |
-|------|-------------|-----------|
-| queued가 계속 증가 | 서버 처리 속도 저하 | 서버 리소스 확인 |
-| active가 0 | 워커 스레드 문제 | 서버 재시작 |
-| 401 오류 | API 키 문제 | Authorization 헤더 확인 |
-| completed가 증가하지 않음 | 처리 오류 발생 | 서버 로그 확인 |
+| 증상                 | 가능한 원인      | 해결 방법               |
+|--------------------|-------------|---------------------|
+| queued가 계속 증가      | 서버 처리 속도 저하 | 서버  리소스 확인          |
+| active가 0          | 워커 스레드 문제   | 서버 재시작              |
+| 401 오류             | API 키 문제    | Authorization 헤더 확인 |
+| completed가 증가하지 않음 | 처리 오류 발생    | 서버 로그 확인            |
 
 ---
 
