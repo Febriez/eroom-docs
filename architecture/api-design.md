@@ -11,13 +11,13 @@
 
 ## 📋 API 엔드포인트 요약
 
-| 메서드 | 경로 | 목적 | 응답 시간 |
-|--------|------|------|-----------|
-| GET | / | 서버 상태 확인 | < 10ms |
-| GET | /health | 상세 헬스체크 | < 20ms |
-| POST | /room/create | 룸 생성 요청 | < 100ms |
-| GET | /room/result?ruid={id} | 결과 조회 | < 50ms |
-| GET | /queue/status | 큐 상태 확인 | < 20ms |
+| 메서드  | 경로                     | 목적       | 응답 시간   |
+|------|------------------------|----------|---------|
+| GET  | /                      | 서버 상태 확인 | < 10ms  |
+| GET  | /health                | 상세 헬스체크  | < 20ms  |
+| POST | /room/create           | 룸 생성 요청  | < 100ms |
+| GET  | /room/result?ruid={id} | 결과 조회    | < 50ms  |
+| GET  | /queue/status          | 큐 상태 확인  | < 20ms  |
 
 ---
 
@@ -47,32 +47,32 @@ export EROOM_PRIVATE_KEY="your-secure-api-key"
 
 ### 룸 생성 요청 → 결과 조회 플로우
 
-{% mermaid %}
+```mermaid
 sequenceDiagram
-participant Client
-participant Server
-participant Queue
-participant AI Services
+    participant Client
+    participant Server
+    participant Queue
+    participant AI Services
 
     Client->>Server: POST /room/create
     Server->>Queue: Add to queue
     Server-->>Client: { "ruid": "room_12345" }
-    
+
     Note over Client: 폴링 시작
-    
+
     Client->>Server: GET /room/result?ruid=room_12345
     Server-->>Client: { "status": "QUEUED" }
-    
+
     Queue->>AI Services: Process request
-    
+
     Client->>Server: GET /room/result?ruid=room_12345
     Server-->>Client: { "status": "PROCESSING" }
-    
+
     AI Services-->>Queue: Complete
-    
+
     Client->>Server: GET /room/result?ruid=room_12345
     Server-->>Client: { "status": "COMPLETED", data... }
-{% endmermaid %}
+```
 
 ---
 
@@ -90,10 +90,11 @@ participant AI Services
 ```json
 {
   "uuid": "user_12345",
-  "theme": "우주정거장",
+  "theme": "victoria",
   "keywords": [
-    "미래",
-    "과학"
+    "vase",
+    "music box",
+    "fire place"
   ],
   "difficulty": "normal",
   "room_prefab": "https://example.com/prefab.fbx"
@@ -127,19 +128,20 @@ participant AI Services
 {
   "uuid": "user_12345",
   "ruid": "room_a1b2c3d4e5f6",
-  "theme": "우주정거장",
+  "theme": "victoria",
   "difficulty": "normal",
   "keywords": [
-    "미래",
-    "과학"
+    "vase",
+    "music box",
+    "fire place"
   ],
   "room_prefab": "https://example.com/prefab.fbx",
   "scenario": {
     "scenario_data": {
-      "theme": "우주정거장",
-      "description": "버려진 우주정거장 탈출 시나리오",
-      "escape_condition": "메인 에어락 열기",
-      "puzzle_flow": "전력 복구 → 산소 시스템 → 통신 수리 → 탈출"
+      "theme": "victoria",
+      "description": "빅토리아 시대의 낡은 가정집에서 깨어났다",
+      "escape_condition": "메인 거실 문 열기",
+      "puzzle_flow": "장식품 조작 → 음악상자 해제 → 벽난로 비밀 → 탈출"
     },
     "object_instructions": [
       {
@@ -151,11 +153,11 @@ participant AI Services
   },
   "scripts": {
     "GameManager.cs": "base64_encoded_content",
-    "DoorLock.cs": "base64_encoded_content"
+    "AntiqueMusicBox.cs": "base64_encoded_content"
   },
   "model_tracking": {
-    "SpaceHelmet": "https://meshy.ai/.../model.fbx",
-    "ControlPanel": "res_tracking_id_2"
+    "AntiqueVase": "https://meshy.ai/.../model.fbx",
+    "VictorianMusicBox": "res_tracking_id_2"
   },
   "success": true,
   "timestamp": "1234567890"
@@ -245,15 +247,15 @@ const pollInterval = {
 
 async function pollResult(ruid) {
     let interval = pollInterval.initial;
-    
+
     while (true) {
         const result = await fetch(`/room/result?ruid=${ruid}`);
         const data = await result.json();
-        
+
         if (data.status === 'COMPLETED' || data.status === 'FAILED') {
             return data;
         }
-        
+
         await sleep(interval);
         interval = Math.min(interval * pollInterval.multiplier, pollInterval.max);
     }

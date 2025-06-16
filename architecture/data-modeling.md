@@ -54,7 +54,7 @@ end
 | 필드 | 타입 | 필수 | 설명 | 제약사항 |
 |------|------|------|------|----------|
 | uuid | String | ✅ | 사용자 고유 식별자 | 비어있지 않음 |
-| theme | String | ✅ | 방탈출 테마 (예: "우주정거장") | 비어있지 않음 |
+| theme | String | ✅ | 방탈출 테마 (예: "victoria") | 비어있지 않음 |
 | keywords | String[] | ✅ | 키워드 배열 (최소 1개) | 빈 키워드 없음 |
 | difficulty | String | ❌ | 난이도 | easy/normal/hard (기본값: normal) |
 | room_prefab | String | ✅ | Unity 프리팹 URL | https:// 로 시작 |
@@ -136,7 +136,7 @@ private record QueuedRoomRequest(
 
 | 필드 | 타입 | 설명 |
 |------|------|------|
-| objectName | String | 오브젝트 이름 (예: "SpaceHelmet") |
+| objectName | String | 오브젝트 이름 (예: "AntiqueVase") |
 | trackingId | String | Meshy AI 추적 ID, URL 또는 에러 코드 |
 
 ```java
@@ -170,21 +170,21 @@ public class ModelGenerationResult {
 {
   "uuid": "user_12345",
   "ruid": "room_a1b2c3d4e5f6",
-  "theme": "우주정거장",
+  "theme": "victoria",
   "difficulty": "normal",
-  "keywords": ["미래", "과학", "생존"],
-  "room_prefab": "https://example.com/prefab/space_station.fbx",
+  "keywords": ["vase", "music box", "fire place"],
+  "room_prefab": "https://example.com/prefab/victoria_house.fbx",
   "scenario": {
     "scenario_data": { ... },
     "object_instructions": [ ... ]
   },
   "scripts": {
     "GameManager.cs": "base64_encoded_content",
-    "PowerGenerator.cs": "base64_encoded_content"
+    "AntiqueMusicBox.cs": "base64_encoded_content"
   },
   "model_tracking": {
-    "PowerGenerator": "https://meshy.ai/.../model.fbx",
-    "OxygenTank": "res_tracking_id_2"
+    "AntiqueVase": "https://meshy.ai/.../model.fbx",
+    "VictorianMusicBox": "res_tracking_id_2"
   },
   "success": true,
   "timestamp": "1234567890"
@@ -247,10 +247,10 @@ JobState ||--|| JsonObject : "results in"
 ```json
 {
   "scenario_data": {
-    "theme": "우주정거장",
+    "theme": "victoria",
     "difficulty": "normal",
-    "description": "버려진 우주정거장에서의 탈출",
-    "escape_condition": "메인 에어락 열기",
+    "description": "빅토리아 시대의 낡은 가정집에서의 탈출",
+    "escape_condition": "메인 거실 문 열기",
     "puzzle_flow": "단계별 퍼즐 진행 설명"
   },
   "object_instructions": [
@@ -260,19 +260,19 @@ JobState ||--|| JsonObject : "results in"
       "functional_description": "전체 게임 상태 관리"
     },
     {
-      "name": "SpaceHelmet",
+      "name": "AntiqueMusicBox",
       "type": "interactive_object",
-      "visual_description": "우주 헬멧, 투명한 바이저",
+      "visual_description": "빅토리아 시대 앤틱 음악상자, 발레리나 장식",
       "interaction_method": "left_click",
-      "functional_description": "산소 공급 시스템 활성화",
-      "placement_suggestion": "에어락 근처",
-      "puzzle_role": "산소 공급 퍼즐의 핵심",
-      "dependencies": "PowerGenerator",
-      "success_outcome": "oxygen_enabled",
-      "failure_feedback": "전원이 꺼져있습니다.",
+      "functional_description": "특정 멜로디 연주로 비밀 서랍 열기",
+      "placement_suggestion": "거실 테이블 위",
+      "puzzle_role": "벽난로 비밀 퍼즐의 핵심",
+      "dependencies": "AntiqueVase",
+      "success_outcome": "fireplace_unlocked",
+      "failure_feedback": "올바른 멜로디가 아닙니다.",
       "hint_messages": [
-        "헬멧의 전원 버튼을 찾아보세요",
-        "먼저 발전기를 작동시켜야 합니다"
+        "음악상자의 손잡이를 돌려보세요",
+        "화병에서 얻은 악보를 참고하세요"
       ]
     }
   ]
@@ -290,8 +290,8 @@ JobState ||--|| JsonObject : "results in"
 ```json
 {
   "GameManager": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFN5c3RlbS5Db2xsZWN0aW9uczoK...",
-  "SpaceHelmet": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFVuaXR5RW5naW5lLklucHV0U3lz...",
-  "DoorController": "dXNpbmcgVW5pdHlFbmdpbmU7CnB1YmxpYyBjbGFzcyBEb29yQ29udHJvbGxl..."
+  "AntiqueMusicBox": "dXNpbmcgVW5pdHlFbmdpbmU7CnVzaW5nIFVuaXR5RW5naW5lLklucHV0U3lz...",
+  "FireplaceController": "dXNpbmcgVW5pdHlFbmdpbmU7CnB1YmxpYyBjbGFzcyBGaXJlcGxhY2VDb250..."
 }
 ```
 
@@ -313,12 +313,12 @@ string decodedScript = Encoding.UTF8.GetString(
 
 ```json
 {
-  "PowerGenerator": "https://meshy.ai/.../power_generator.fbx",
-  "OxygenTank": "res_ghi789jkl012",
-  "ControlPanel": "res_mno345pqr678",
+  "AntiqueVase": "https://meshy.ai/.../antique_vase.fbx",
+  "VictorianMusicBox": "res_ghi789jkl012",
+  "FireplaceGrate": "res_mno345pqr678",
   "failed_models": {
-    "ComplexMachine": "error-preview-timeout",
-    "BrokenPanel": "error-general-uuid123"
+    "VintageChair": "error-preview-timeout",
+    "OrnateFrame": "error-general-uuid123"
   }
 }
 ```
@@ -336,20 +336,20 @@ string decodedScript = Encoding.UTF8.GetString(
 
 ### 입력 검증 (RoomRequestValidator)
 
-| 필드 | 검증 규칙 |
-|------|-----------|
-| uuid | 비어있지 않음, 공백 제거 |
-| theme | 비어있지 않음, 최대 100자 |
-| keywords | 최소 1개, 각 키워드 비어있지 않음 |
-| difficulty | easy/normal/hard 중 하나 또는 null |
-| room_prefab | https:// 로 시작하는 유효한 URL |
+| 필드          | 검증 규칙                         |
+|-------------|-------------------------------|
+| uuid        | 비어있지 않음, 공백 제거                |
+| theme       | 비어있지 않음, 최대 100자              |
+| keywords    | 최소 1개, 각 키워드 비어있지 않음          |
+| difficulty  | easy/normal/hard 중 하나 또는 null |
+| room_prefab | https:// 로 시작하는 유효한 URL       |
 
 ### 시나리오 검증 (DefaultScenarioValidator)
 
 ```java
 private void validateStructure(JsonObject scenario) {
-    if (!scenario.has("scenario_data") || 
-        !scenario.has("object_instructions")) {
+    if (!scenario.has("scenario_data") ||
+            !scenario.has("object_instructions")) {
         throw new RuntimeException("시나리오 구조가 올바르지 않습니다");
     }
 }
@@ -359,7 +359,7 @@ private void validateObjectInstructions(JsonObject scenario) {
     if (objects.isEmpty()) {
         throw new RuntimeException("오브젝트 설명이 없습니다");
     }
-    
+
     // GameManager 확인
     JsonObject firstObject = objects.get(0).getAsJsonObject();
     if (!firstObject.get("name").getAsString().equals("GameManager")) {
@@ -399,13 +399,13 @@ firestore/
 
 ## 📊 데이터 크기 예측
 
-| 데이터 유형 | 평균 크기 | 최대 크기 |
-|-------------|-----------|-----------|
-| 요청 데이터 | ~1 KB | 5 KB |
-| 시나리오 | ~10 KB | 50 KB |
-| 스크립트 (각) | ~5 KB | 20 KB |
-| 전체 응답 | ~50 KB | 200 KB |
-| 3D 모델 메타데이터 | ~2 KB | 5 KB |
+| 데이터 유형      | 평균 크기  | 최대 크기  |
+|-------------|--------|--------|
+| 요청 데이터      | ~1 KB  | 5 KB   |
+| 시나리오        | ~10 KB | 50 KB  |
+| 스크립트 (각)    | ~5 KB  | 20 KB  |
+| 전체 응답       | ~50 KB | 200 KB |
+| 3D 모델 메타데이터 | ~2 KB  | 5 KB   |
 
 ---
 
