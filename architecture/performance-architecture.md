@@ -435,16 +435,6 @@ CompletableFuture<Map<String, String>> scriptFuture =
 
 ## 🔧 서버 설정 최적화
 
-### JVM 최적화 설정
-
-```bash
-# JVM 옵션 설정 (start.sh)
-JVM_OPTS="-Xms512m -Xmx2g -XX:+UseG1GC \
-          -XX:MaxGCPauseMillis=200 \
-          -XX:+UseStringDeduplication \
-          -XX:+OptimizeStringConcat"
-```
-
 ### 동시 처리 설정
 
 ```java
