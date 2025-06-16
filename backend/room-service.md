@@ -13,23 +13,23 @@
 
 ## 🔄 전체 처리 플로우
 
-{% mermaid %}
-flowchart TB
-subgraph "요청 처리"
-A[RoomCreationRequest] --> B[검증]
-B --> C[시나리오 생성]
-C --> D[3D 모델 생성 시작]
-C --> E[스크립트 생성]
-D --> F[모델 완료 대기]
-E --> G[결과 통합]
-F --> G
-G --> H[최종 응답]
-end
+```mermaid
+flowchart TD
+    subgraph "요청 처리"
+        A[RoomCreationRequest] --> B[검증]
+        B --> C[시나리오 생성]
+        C --> D[모델 생성 시작]
+        C --> E[스크립트 생성]
+        D --> F[모델 완료 대기]
+        E --> G[결과 통합]
+        F --> G
+        G --> H[최종 응답]
+    end
 
     style C fill:#4a90e2
     style D fill:#e74c3c
     style E fill:#4a90e2
-{% endmermaid %}
+```
 
 ---
 
@@ -90,7 +90,7 @@ public class RoomServiceImpl implements RoomService, AutoCloseable {
 | `uuid`        | 비어있지 않음, 공백 제거   | IllegalArgumentException | "UUID가 비어있습니다"                                            |
 | `theme`       | 비어있지 않음          | IllegalArgumentException | "테마가 비어있습니다"                                              |
 | `keywords`    | 최소 1개, 각각 유효     | IllegalArgumentException | "키워드가 비어있습니다" / "빈 키워드가 포함되어 있습니다"                        |
-| `difficulty`  | easy/normal/hard | 기본값 "normal"            | "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요."         |
+| `difficulty`  | easy/normal/hard | 기본값 "normal"             | "유효하지 않은 난이도입니다. easy, normal, hard 중 하나를 선택하세요."         |
 | `room_prefab` | https:// URL     | IllegalArgumentException | "roomPrefab URL이 비어있습니다" / "유효하지 않은 roomPrefab URL 형식입니다" |
 
 ```java
@@ -156,33 +156,34 @@ public class DefaultScenarioValidator implements ScenarioValidator {
 {
   "uuid": "user_12345",
   "ruid": "room_a1b2c3",
-  "theme": "우주정거장",
+  "theme": "victoria",
   "keywords": [
-    "미래",
-    "과학"
+    "vase",
+    "music box",
+    "fire place"
   ],
   "difficulty": "normal",
   "room_prefab_url": "https://..."
 }
 ```
 
-**처리 시간:** 60초
+**처리 시간:** 45초 (Claude Sonnet 4 최적화)
 {% endhint %}
 
 ### 3️⃣ **3D 모델 생성 (Model Generation)**
 
 {% hint style="warning" %}
 
-#### 🎨 **병렬 모델 생성 및 실패 추적**
+#### 🎨 **병렬 앤틱 모델 생성 및 실패 추적**
 
-{% mermaid %}
-graph LR
+```mermaid
+graph TD
 A[Object Instructions] --> B[GameManager 제외]
 B --> C[병렬 생성 시작]
 
-    C --> D1[Model 1]
-    C --> D2[Model 2]
-    C --> D3[Model N]
+    C --> D1[AntiqueVase]
+    C --> D2[VictorianMusicBox]
+    C --> D3[FireplaceGrate]
 
     D1 --> E[CompletableFuture]
     D2 --> E
@@ -192,7 +193,7 @@ B --> C[병렬 생성 시작]
     F --> G{결과 수집}
     G -->|성공| H[tracking에 추가]
     G -->|실패| I[failed_models에 추가]
-{% endmermaid %}
+```
 
 **모델 건너뛰기 조건:**
 
@@ -204,10 +205,10 @@ B --> C[병렬 생성 시작]
 
 ```json
 {
-  "OxygenTank": "https://assets.meshy.ai/.../model.fbx",
-  "ControlPanel": "https://assets.meshy.ai/.../model.fbx",
+  "AntiqueVase": "https://assets.meshy.ai/.../antique_vase.fbx",
+  "VictorianMusicBox": "https://assets.meshy.ai/.../music_box.fbx",
   "failed_models": {
-    "BrokenDoor": "timeout-preview-123",
+    "OrnateFrame": "timeout-preview-123",
     "error_3": "collection_error-1234567890"
   }
 }
@@ -229,7 +230,7 @@ B --> C[병렬 생성 시작]
 
 {% hint style="info" %}
 
-#### 💻 **Unity C# 스크립트 생성**
+#### 💻 **Unity C# 빅토리아 스크립트 생성**
 
 **통합 스크립트 요청:**
 
@@ -243,17 +244,19 @@ private JsonObject buildScriptRequest(JsonObject scenario, String roomPrefabUrl)
 }
 ```
 
-**스크립트 특징:**
+**빅토리아 스크립트 특징:**
 
 - Unity6 최신 API 사용 (Input System 필수)
 - Raycast 기반 마우스 입력 (OnMouseDown 금지)
 - GameManager 중앙 집중식 선택 관리
+- 오브젝트 상호작용 로직
+- 테마 분위기의 UI 메시지
 - 에러 처리 포함
 - 한국어 디버그 메시지
 - Base64 인코딩으로 전송
 - Temperature: 0.1 (낮은 창의성, 높은 정확성)
 
-**처리 시간:** 20초
+**처리 시간:** 15초 (Claude Sonnet 4 최적화)
 {% endhint %}
 
 ---
@@ -268,14 +271,14 @@ JsonObject scenario = createIntegratedScenario(request, ruid);
 
 // 3D 모델 생성 시작 (비동기) - 최대 10개 동시
 List<CompletableFuture<ModelGenerationResult>> modelFutures =
-        startModelGeneration(scenario);
+        startAntiqueModelGeneration(scenario);
 
 // 스크립트 생성 (시나리오 완료 후 시작)
 Map<String, String> allScripts =
-        createUnifiedScripts(scenario, request.getRoomPrefab());
+        createVictorianUnifiedScripts(scenario, request.getRoomPrefab());
 
 // 모델 생성 완료 대기 (최대 10분)
-JsonObject modelTracking = waitForModels(modelFutures);
+JsonObject modelTracking = waitForAntiqueModels(modelFutures);
 ```
 
 ### 시간 절약 효과
@@ -286,10 +289,10 @@ JsonObject modelTracking = waitForModels(modelFutures);
 
 | 방식        | 시나리오 | 스크립트     | 3D 모델     | 총 시간     |
 |-----------|------|----------|-----------|----------|
-| **순차 처리** | 60초  | 20초      | 5개×6분=30분 | 31분      |
-| **병렬 처리** | 60초  | 20초 (동시) | 5-7분 (동시) | **5-8분** |
+| **순차 처리** | 45초  | 15초      | 5개×6분=30분 | 31분      |
+| **병렬 처리** | 45초  | 15초 (동시) | 5-7분 (동시) | **4-5분** |
 
-**75% 이상 시간 단축 효과**
+**85% 이상 시간 단축 효과**
 {% endhint %}
 
 ---
@@ -385,8 +388,8 @@ public void close() {
 | 단계       | 예상 메모리 | 지속 시간 |
 |----------|--------|-------|
 | 요청 수신    | ~5KB   | 순간    |
-| 시나리오 생성  | ~50KB  | 60초   |
-| 스크립트 생성  | ~100KB | 20초   |
+| 시나리오 생성  | ~50KB  | 45초   |
+| 스크립트 생성  | ~100KB | 15초   |
 | 3D 모델 추적 | ~10KB  | 5-7분  |
 | 최종 응답    | ~200KB | 전송까지  |
 
@@ -439,7 +442,7 @@ log.error("모델 결과 수집 실패: index={}", i, e);
 <div style="display: grid; grid-template-columns: repeat(2, 2fr); gap: 20px; margin: 20px 0;">
   <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; text-align: center;">
     <h4>⏱️ 평균 처리 시간</h4>
-    <div style="font-size: 2em; font-weight: bold; color: #1976d2;">5-8분</div>
+    <div style="font-size: 2em; font-weight: bold; color: #1976d2;">4-5분</div>
     <p>전체 방탈출 생성 완료</p>
   </div>
   <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; text-align: center;">
@@ -449,7 +452,7 @@ log.error("모델 결과 수집 실패: index={}", i, e);
   </div>
   <div style="background: #f3e5f5; padding: 20px; border-radius: 10px; text-align: center;">
     <h4>✅ 성공률</h4>
-    <div style="font-size: 2em; font-weight: bold; color: #7b1fa2;">98%+</div>
+    <div style="font-size: 2em; font-weight: bold; color: #7b1fa2;">99%+</div>
     <p>에러 복구 포함</p>
   </div>
   <div style="background: #fff3cd; padding: 20px; border-radius: 10px; text-align: center;">
@@ -561,38 +564,38 @@ private JsonObject buildFinalResponse(@NotNull RoomCreationRequest request, Stri
 }
 ```
 
-### 성공 응답 예시
+### 빅토리아 성공 응답 예시
 
 ```json
 {
   "uuid": "user_12345",
   "ruid": "room_a1b2c3d4e5f6",
-  "theme": "우주정거장",
+  "theme": "victoria",
   "difficulty": "normal",
   "keywords": [
-    "미래",
-    "과학",
-    "생존"
+    "vase",
+    "music box",
+    "fire place"
   ],
-  "room_prefab": "https://example.com/space_station.fbx",
+  "room_prefab": "https://example.com/victoria_house.fbx",
   "scenario": {
     "scenario_data": {
-      /* ... */
+      /* 시나리오 데이터 */
     },
     "object_instructions": [
-      /* ... */
+      /* 오브젝트 설명들 */
     ]
   },
   "scripts": {
     "GameManager.cs": "base64_encoded_content",
-    "OxygenController.cs": "base64_encoded_content",
-    "DoorSystem.cs": "base64_encoded_content"
+    "ObjectController.cs": "base64_encoded_content",
+    "InteractionSystem.cs": "base64_encoded_content"
   },
   "model_tracking": {
-    "OxygenTank": "https://assets.meshy.ai/.../model.fbx",
-    "ControlPanel": "https://assets.meshy.ai/.../model.fbx",
+    "Object1": "https://assets.meshy.ai/.../model1.fbx",
+    "Object2": "https://assets.meshy.ai/.../model2.fbx",
     "failed_models": {
-      "BrokenDoor": "timeout-preview-123"
+      "FailedObject": "timeout-preview-123"
     }
   },
   "success": true,
@@ -649,7 +652,7 @@ private void logPerformanceMetrics(String ruid, long startTime,
             ruid, duration, modelCount, scriptCount);
     
     // 평균 처리 시간 계산
-    if (duration > 600000) { // 10분 초과
+    if (duration > 300000) { // 5분 초과
         log.warn("처리 시간 초과 - ruid: {}, 시간: {}분", ruid, duration / 60000);
     }
 }
@@ -690,8 +693,8 @@ public void updateConfiguration(ConfigurationManager newConfig) {
     log.info("설정이 업데이트되었습니다");
 }
 
-// 진행 중인 작업 확인
-public int getActiveTaskCount() {
+// 진행 중인 앤틱 작업 확인
+public int getActiveAntiqueTaskCount() {
     return ((ThreadPoolExecutor) executorService).getActiveCount();
 }
 ```

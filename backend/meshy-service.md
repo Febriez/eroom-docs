@@ -51,7 +51,7 @@ public class MeshyApiService implements MeshService {
 
 ### 전체 생성 플로우
 
-{% mermaid %}
+```mermaid
 flowchart TB
 A[텍스트 설명] --> B[Preview 생성]
 B --> C{상태 확인}
@@ -71,7 +71,7 @@ H --> I[URL 반환]
     style E fill:#4a90e2
     style I fill:#4caf50
     style J fill:#e74c3c
-{% endmermaid %}
+```
 
 ---
 

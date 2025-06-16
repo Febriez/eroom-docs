@@ -39,7 +39,7 @@ public class ApiHandler implements RequestHandler {
 
 #### 🔗 **컴포넌트 의존성**
 
-{% mermaid %}
+```mermaid
 graph TD
 A[ApiHandler] --> B[Gson]
 A --> C[QueueManager]
@@ -55,7 +55,8 @@ A --> E[ResponseFormatter]
     style B fill:#f39c12
     style C fill:#2ecc71
     style D fill:#e74c3c
-{% endmermaid %}
+```
+
 {% endhint %}
 
 ---
@@ -158,7 +159,7 @@ private JsonObject formatQueueStatus(QueueManager.QueueStatus status) {
 
 **처리 플로우:**
 
-{% mermaid %}
+```mermaid
 flowchart LR
 A[요청 수신] --> B[JSON 파싱]
 B --> C{검증}
@@ -166,7 +167,7 @@ C -->|성공| D[큐에 등록]
 C -->|실패| E[400 에러]
 D --> F[ruid 생성]
 F --> G[202 응답]
-{% endmermaid %}
+```
 
 **구현 상세:**
 
@@ -349,18 +350,17 @@ exchange.getRequestReceiver().receiveFullString((httpExchange, message) -> {
 
 ### 계층적 검증
 
-{% mermaid %}
+```mermaid
 graph TD
 A[HTTP 레벨] --> B[헤더 검증]
 B --> C[JSON 레벨]
 C --> D[구조 검증]
 D --> E[비즈니스 레벨]
 E --> F[값 검증]
-
-    B --> G[API Key]
-    D --> H[필수 필드]
-    F --> I[값 범위/형식]
-{% endmermaid %}
+B --> G[API Key]
+D --> H[필수 필드]
+F --> I[값 범위/형식]
+```
 
 ### 검증 실패 처리
 
@@ -462,4 +462,6 @@ private String extractRuidFromQuery(HttpServerExchange exchange) {
 
 ---
 
-> 💡 ApiHandler는 **안정적**이고 **예측 가능한** API 서비스의 핵심입니다.
+<div style="text-align: center; margin-top: 30px; color: #666;">
+  <p>ApiHandler는 <strong>안정적</strong>이고 <strong>예측 가능한</strong> API 서비스의 핵심입니다.</p>
+</div>

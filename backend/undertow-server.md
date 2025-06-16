@@ -83,7 +83,7 @@ public class RoomRequestQueueManager implements QueueManager {
 
 ### 큐 처리 플로우
 
-{% mermaid %}
+```mermaid
 sequenceDiagram
 participant Client
 participant Queue
@@ -97,7 +97,7 @@ participant AI Services
     Worker->>AI Services: process
     AI Services-->>Worker: result
     Worker->>JobResultStore: store result
-{% endmermaid %}
+```
 
 ---
 
@@ -287,13 +287,13 @@ public void stop() {
 
 ### 큐 시스템 성능
 
-{% mermaid %}
+```mermaid
 graph LR
 A[요청 수신] -->|< 100ms| B[큐 등록]
 B -->|즉시| C[ruid 반환]
 B -->|비동기| D[백그라운드 처리]
 D -->|5-8분| E[완료]
-{% endmermaid %}
+```
 
 ---
 

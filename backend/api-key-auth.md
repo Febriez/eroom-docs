@@ -13,7 +13,7 @@
 
 ### 컴포넌트 관계도
 
-{% mermaid %}
+```mermaid
 graph TB
 subgraph "인증 흐름"
 C[Client Request] --> F[ApiKeyAuthFilter]
@@ -32,7 +32,7 @@ V -->|No| E[401 Unauthorized]
     style F fill:#e74c3c
     style AC fill:#3498db
     style E fill:#e74c3c
-{% endmermaid %}
+```
 
 ---
 
@@ -163,7 +163,7 @@ private void sendUnauthorizedResponse(@NotNull HttpServerExchange exchange, Stri
 
 ### 성공적인 인증
 
-{% mermaid %}
+```mermaid
 sequenceDiagram
 participant Client
 participant Filter
@@ -176,7 +176,7 @@ participant Service
     Handler->>Service: Process
     Service-->>Handler: Result
     Handler-->>Client: 200 Response
-{% endmermaid %}
+```
 
 ### 인증 실패
 
